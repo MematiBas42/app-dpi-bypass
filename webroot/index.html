@@ -827,7 +827,6 @@ input:checked + .slider:before {
 
       container.appendChild(item);
     });
-    });
   }
 
   function escapeHtml(str) {
@@ -887,8 +886,9 @@ input:checked + .slider:before {
     btn.disabled = true;
     toast("Kaydediliyor ve kurallar güncelleniyor...");
 
-    var pkgs = Array.from(state.selected).join(" ");
-    var cmd = SCRIPT + " save-apps " + pkgs;
+    var pkgs = [];
+    state.selected.forEach(function(pkg) { pkgs.push(pkg); });
+    var cmd = SCRIPT + " save-apps " + pkgs.join(" ");
 
     ksuExec(cmd).then(function(res) {
       btn.disabled = false;
@@ -899,9 +899,20 @@ input:checked + .slider:before {
   });
 
   // İlk yükleme
-  document.addEventListener("DOMContentLoaded", function() {
-    loadData();
-  });
+  loadData();
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", loadData);
+  }
+
+  var statusPill = document.getElementById("statusPill");
+  if (statusPill) {
+    statusPill.style.cursor = "pointer";
+    statusPill.title = "Yenilemek için dokunun";
+    statusPill.addEventListener("click", function() {
+      toast("Yenileniyor...");
+      loadData();
+    });
+  }
 
 })();
 </script>
