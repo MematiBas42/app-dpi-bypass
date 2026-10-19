@@ -225,7 +225,7 @@ get_data() {
     fi
 
     echo "---APPS---"
-    T_USER="/data/local/tmp/user_pkgs.txt"
+    T_USER="/data/local/tmp/user_pkgs_$$.txt"
     pm list packages -3 2>/dev/null | sed 's/^package://' | sort > "$T_USER"
     awk '
     FNR==NR { u[$1]=1; next }
@@ -241,7 +241,7 @@ save_apps() {
     if [ $# -gt 0 ]; then
         printf "%s\n" "$@" > "$TMP"
     else
-        cat > "$TMP"
+        : > "$TMP"
     fi
     mv -f "$TMP" "$CONF"
     reload

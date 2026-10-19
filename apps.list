@@ -2,5 +2,3 @@
 # Satır başına bir paket adı giriniz. '#' ile başlayan satırlar yoksayılır.
 # WebUI üzerinden kolayca yönetilebilir.
 com.discord
-com.discord.canary
-com.discord.ptb

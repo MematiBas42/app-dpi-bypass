@@ -662,6 +662,22 @@ input:checked + .slider:before {
         console.error("Package info resolution error:", e);
       }
 
+      // Seçili olup listede olmayan paketleri ekle (örnek: yüklü olmayan veya elle eklenmiş)
+      state.selected.forEach(function(p) {
+        var exists = false;
+        for (var j = 0; j < state.apps.length; j++) {
+          if (state.apps[j].pkg === p) { exists = true; break; }
+        }
+        if (!exists) {
+          state.apps.push({
+            pkg: p,
+            uid: "-",
+            user: true,
+            label: cleanLabel(p) + " (Yüklü Değil)"
+          });
+        }
+      });
+
       // Sıralama: Seçili olanlar en üstte, sonra alfabetik etiket
       state.apps.sort(function(a, b) {
         var aSel = state.selected.has(a.pkg);
@@ -759,6 +775,20 @@ input:checked + .slider:before {
       var emptyDiv = document.createElement("div");
       emptyDiv.className = "empty-msg";
       emptyDiv.textContent = "Eşleşen uygulama bulunamadı.";
+      if (filter.indexOf(".") !== -1) {
+        var addBtn = document.createElement("button");
+        addBtn.className = "btn-secondary";
+        addBtn.style.marginTop = "12px";
+        addBtn.textContent = "+ " + filter + " paketini ekle";
+        addBtn.onclick = function() {
+          setPkg(filter, true);
+          document.getElementById("searchInput").value = "";
+          state.filterText = "";
+          renderUI();
+        };
+        emptyDiv.appendChild(document.createElement("br"));
+        emptyDiv.appendChild(addBtn);
+      }
       container.appendChild(emptyDiv);
       return;
     }
