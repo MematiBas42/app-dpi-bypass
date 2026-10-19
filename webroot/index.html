@@ -588,15 +588,13 @@ input:checked + .slider:before {
   function loadData() {
     return ksuExec(SCRIPT + " get-data").then(function(res) {
       var out = res.stdout || "";
-      var parts = out.split("---");
       var statusPart = "", selectedPart = "", appsPart = "";
-
-      for (var i = 0; i < parts.length; i++) {
-        var p = parts[i].trim();
-        if (p.indexOf("STATUS") === 0) statusPart = p.substring(6).trim();
-        else if (p.indexOf("SELECTED") === 0) selectedPart = p.substring(8).trim();
-        else if (p.indexOf("APPS") === 0) appsPart = p.substring(4).trim();
-      }
+      var mStatus = out.match(/---STATUS---([\s\S]*?)(?:---SELECTED---|---APPS---|$)/);
+      if (mStatus) statusPart = mStatus[1].trim();
+      var mSelected = out.match(/---SELECTED---([\s\S]*?)(?:---APPS---|$)/);
+      if (mSelected) selectedPart = mSelected[1].trim();
+      var mApps = out.match(/---APPS---([\s\S]*)$/);
+      if (mApps) appsPart = mApps[1].trim();
 
       // 1. Status Parse
       if (statusPart) {
