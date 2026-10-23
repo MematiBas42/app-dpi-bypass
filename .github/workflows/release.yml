@@ -1,0 +1,41 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build & Release Module
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build module package
+        run: |
+          chmod +x package.sh
+          ./package.sh
+
+      - name: Generate Checksums
+        run: |
+          cd dist
+          sha256sum *.zip > sha256.txt
+          cat sha256.txt
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: App DPI Bypass ${{ github.ref_name }}
+          files: |
+            dist/*.zip
+            dist/sha256.txt
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

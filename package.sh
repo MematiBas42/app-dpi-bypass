@@ -5,10 +5,11 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DIST_DIR="$SCRIPT_DIR/dist"
 mkdir -p "$DIST_DIR"
 
-ZIP_NAME="app-dpi-bypass-v2.0.0.zip"
+VERSION=$(grep -m1 '^version=' "$SCRIPT_DIR/module.prop" | cut -d= -f2 | tr -d ' \r\n')
+ZIP_NAME="app-dpi-bypass-${VERSION}.zip"
 TARGET_ZIP="$DIST_DIR/$ZIP_NAME"
 
-rm -f "$TARGET_ZIP"
+rm -f "$TARGET_ZIP" "$DIST_DIR/app-dpi-bypass.zip"
 
 cd "$SCRIPT_DIR"
 zip -r9 "$TARGET_ZIP" \
@@ -23,6 +24,7 @@ zip -r9 "$TARGET_ZIP" \
     bin \
     webroot
 
-ln -sf "$ZIP_NAME" "$DIST_DIR/app-dpi-bypass.zip"
+cp -f "$TARGET_ZIP" "$DIST_DIR/app-dpi-bypass.zip"
 
 echo "Packed: $TARGET_ZIP ($(du -h "$TARGET_ZIP" | cut -f1))"
+echo "Copied: $DIST_DIR/app-dpi-bypass.zip"
