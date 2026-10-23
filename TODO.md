@@ -1,4 +1,4 @@
-# TODO: Per-App DoH (DNS over HTTPS) Zygisk Entegrasyonu
+# TODO & Roadmap: Per-App DoH (DNS over HTTPS) Zygisk Entegrasyonu
 
 ## 1. Hedef ve Kapsam
 - **Amaç:** VpnService (`tun0`) veya global Private DNS ayarlarını değiştirmeden, sadece `apps.list` içinde tanımlı uygulamalar (başta Discord `com.discord`) için bağımsız DoH çözümlemesi sağlamak.
@@ -22,11 +22,11 @@
               └── 'apps.list' içinde VARSA ──> postAppSpecialize()
                                                            │
                                                            ▼
-                                                [libc.so Inline Hook]
-                                                (getaddrinfo sembolü)
+                                                [libc.so DobbyHook]
+                                      (getaddrinfo & android_getaddrinfo*)
                                                            │
                                                            ▼
-                                                [127.0.0.1:5353 UDP Sor]
+                                                [127.0.0.1:5354 UDP Sor]
                                                    (Local DoH Daemon)
                                                            │
                                                            ▼
@@ -39,29 +39,30 @@
 ## 3. Yol Haritası ve Görev Listesi
 
 ### Aşama 1: Yerel DoH Daemon (Local Forwarder)
-- [ ] Arka planda KernelSU `service.sh` tarafından başlatılacak statik arm64 DoH forwarder ikilisini (`bin/doh_forwarder`) modüle dahil et.
-- [ ] Dinleme adresi: `127.0.0.1:5353` (UDP).
-- [ ] Upstream: Cloudflare (`https://1.1.1.1/dns-query`) veya Google DoH.
-- [ ] DNS önbellekleme (cache) desteği ile düşük gecikme (<1ms).
+- [x] Arka planda KernelSU `service.sh` tarafından başlatılacak statik arm64 DoH forwarder ikilisini (`bin/doh_forwarder`) modüle dahil et.
+- [x] Dinleme adresi: `127.0.0.1:5354` (UDP).
+- [x] Upstream: Cloudflare (`https://1.1.1.1/dns-query`), Google, Quad9, AdGuard veya özel DoH.
+- [x] DNS önbellekleme (cache) ve CLI test (`-test <domain>`) desteği.
 
-### Aşama 2: Zygisk Kütüphanesi (`arm64-v8a.so`)
-- [ ] `jni/` dizininde Zygisk modül yapısını kur:
-  - `zygisk.hpp`: Zygisk API v4/v5 başlığı.
+### Aşama 2: Zygisk Kütüphanesi (`arm64-v8a.so` & `armeabi-v7a.so`)
+- [x] `src/zygisk/` dizininde Zygisk modül yapısını kur:
+  - `zygisk.hpp`: Zygisk API başlığı.
   - `main.cpp`: `preAppSpecialize` (paket filtreleme, hedef dışı için `dlclose()`).
-  - `dns_hook.c`: `libc.so` `getaddrinfo` kancası.
-  - `shadowhook`: Bionic inline hook motoru entegrasyonu.
-- [ ] `getaddrinfo` kanca mantığı:
+  - `DobbyHook`: Linker bağımsız Bionic inline hook motoru entegrasyonu (Android 15–17 / API 35–37 uyumlu).
+- [x] DNS kanca mantığı:
   - IP kontrolleri (gelen girdi zaten IPv4/IPv6 ise orijinal fonksiyona pasla).
-  - Alan adını `127.0.0.1:5353` üzerinden UDP ile çöz.
+  - Alan adını `127.0.0.1:5354` üzerinden UDP ile çöz.
   - Başarılı ise Bionic uyumlu `struct addrinfo` listesi oluştur ve dön.
-  - Zaman aşımı veya hata durumunda orijinal `orig_getaddrinfo` çağrısına düş (Fail-safe / fallback).
+  - Zaman aşımı veya hata durumunda orijinal libc fonksiyonuna düş (Fail-safe / fallback).
+- [x] 32-bit `armeabi-v7a` mimarisi desteği (Discord Android istemcisinin 32-bit çalışması sebebiyle).
 
 ### Aşama 3: Derleme ve Dağıtım Otomasyonu
-- [ ] Derleme aracı: Host üzerindeki `/opt/android-ndk` (NDK r29 aarch64) ile `ndk-build` entegrasyonu.
-- [ ] `package.sh` güncellemesi: `zygisk/arm64-v8a.so` çıktısını modül zip arşivine dahil et.
-- [ ] `deploy.sh` güncellemesi: Cihaza aktarımda Zygisk modül yetkilerini ve dizinini (`/data/adb/modules/app-dpi-bypass/zygisk/`) yapılandır.
+- [x] Host üzerindeki Android NDK (r29) ile CMake entegrasyonu.
+- [x] `package.sh` güncellemesi: `zygisk/*.so` ve `bin/doh_forwarder` çıktılarını modül zip arşivine dahil et.
+- [x] `deploy.sh` ve `customize.sh` güncellemesi: Zygisk modül yetkilerini ve dizinini yapılandır.
 
 ### Aşama 4: Test ve Doğrulama
-- [ ] Discord (`com.discord`) metin akışının ve görsel yüklemelerinin doğrulanması.
-- [ ] Discord WebRTC ses/video kanalı bağlantısının ("RTC Connected") testi.
-- [ ] Bankacılık uygulamalarında `dlclose()` davranışının ve tespit edilmezliğinin doğrulanması.
+- [x] Discord (`com.discord`, UID 10389, 32-bit) metin akışının ve görsel yüklemelerinin doğrulanması.
+- [x] Discord WebRTC ses kanalı bağlantısının ("RTC Bağlandı") testi.
+- [x] Seçili olmayan uygulamalarda `dlclose()` ile sıfır iz (zero-detection) doğrulaması.
+- [x] WebUI v2.0 sekmeleri (Apps, Presets, Auto-Tune, DoH, Advanced) ve mobil ekran responsive testleri.
