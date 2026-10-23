@@ -1,0 +1,27 @@
+# Distribution packages & archives
+/dist/
+*.zip
+*.tar
+*.tar.gz
+*.tar.xz
+
+# NDK & C/C++ build artifacts
+/build/
+/libs/
+/obj/
+.cxx/
+
+# Temporary and runtime files
+*.tmp
+*.bak
+*.log
+*~
+user_pkgs*.txt
+
+# Editor & OS metadata
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
