@@ -9,7 +9,7 @@ VERSION=$(grep -m1 '^version=' "$SCRIPT_DIR/module.prop" | cut -d= -f2 | tr -d '
 ZIP_NAME="app-dpi-bypass-${VERSION}.zip"
 TARGET_ZIP="$DIST_DIR/$ZIP_NAME"
 
-rm -f "$TARGET_ZIP" "$DIST_DIR/app-dpi-bypass.zip"
+rm -f "$DIST_DIR"/*.zip
 
 cd "$SCRIPT_DIR"
 zip -r9 "$TARGET_ZIP" \
@@ -26,7 +26,4 @@ zip -r9 "$TARGET_ZIP" \
     zygisk \
     webroot
 
-cp -f "$TARGET_ZIP" "$DIST_DIR/app-dpi-bypass.zip"
-
 echo "Packed: $TARGET_ZIP ($(du -h "$TARGET_ZIP" | cut -f1))"
-echo "Copied: $DIST_DIR/app-dpi-bypass.zip"

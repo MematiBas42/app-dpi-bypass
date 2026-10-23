@@ -7,7 +7,7 @@
 <p align="center">
   <a href="https://github.com/tiann/KernelSU"><img src="https://img.shields.io/badge/Platform-KernelSU%20%7C%20APatch%20%7C%20Magisk-blue.svg" alt="Platform"></a>
   <a href="https://github.com/bol-van/zapret"><img src="https://img.shields.io/badge/Architecture-aarch64%20%7C%20arm-green.svg" alt="Architecture"></a>
-  <a href="module.prop"><img src="https://img.shields.io/badge/Version-v2.0.0-purple.svg" alt="Version"></a>
+  <a href="module.prop"><img src="https://img.shields.io/badge/Version-v2.0.1-purple.svg" alt="Version"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-orange.svg" alt="License"></a>
 </p>
 
