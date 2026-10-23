@@ -2355,6 +2355,7 @@ button:active:not(:disabled),
           btn.disabled = false;
           if (pBar) pBar.style.width = "0%";
           if (btnText) btnText.textContent = "Run Benchmark";
+          loadData();
           return;
         }
 
@@ -2381,10 +2382,12 @@ button:active:not(:disabled),
               } else {
                 toast("No strategy succeeded! Check target domain or network.", 3500);
               }
+              loadData();
             }).catch(function() {
               if (pBar) pBar.style.width = "0%";
               if (btnText) btnText.textContent = "Run Benchmark";
               btn.disabled = false;
+              loadData();
             });
             return;
           }

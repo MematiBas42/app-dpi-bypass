@@ -526,6 +526,9 @@ autotune_init() {
     if [ -z "$TARGET_IP" ]; then
         TARGET_IP=$(ping -c 1 -W 2 "$TARGET_DOM" 2>/dev/null | grep -m1 -oE '\([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\)' | tr -d '()')
     fi
+    if [ -z "$TARGET_IP" ]; then
+        TARGET_IP=$(nslookup "$TARGET_DOM" 2>/dev/null | awk '/^Address: / {print $2}' | grep -m1 -E '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$')
+    fi
 
     if [ -z "$TARGET_IP" ]; then
         echo "ERROR|DNS resolution failed for $TARGET_DOM"
@@ -547,6 +550,10 @@ autotune_probe() {
     NAME="$1"
     TARGET_DOM="${2:-discord.com}"
     [ -z "$NAME" ] && return 1
+
+    STATE_FILE="$DATA_DIR/.autotune_state"
+    TARGET_IP=""
+    [ -f "$STATE_FILE" ] && TARGET_IP=$(cut -d'|' -f1 "$STATE_FILE" 2>/dev/null)
 
     case "$NAME" in
         discord_optimal)
@@ -571,9 +578,14 @@ autotune_probe() {
 
     killall -9 nfqws 2>/dev/null
     eval "$BIN --daemon --uid=0:0,3003 --qnum=$QNUM $PARAM" 2>/dev/null
-    sleep 0.25
+    sleep 0.35
 
-    PROBE=$(curl -s -k -o /dev/null -w "%{http_code} %{time_total}" --connect-timeout 2 -m 3 "https://$TARGET_DOM" 2>/dev/null || echo "000 0")
+    RESOLVE_OPT=""
+    if [ -n "$TARGET_IP" ]; then
+        RESOLVE_OPT="--resolve $TARGET_DOM:443:$TARGET_IP"
+    fi
+
+    PROBE=$(curl -s -k -o /dev/null -w "%{http_code} %{time_total}" $RESOLVE_OPT --connect-timeout 5 -m 8 "https://$TARGET_DOM" 2>/dev/null || echo "000 0")
     HTTP_CODE=$(echo "$PROBE" | awk '{print $1}')
     TIME_SEC=$(echo "$PROBE" | awk '{print $2}')
 
@@ -589,16 +601,19 @@ autotune_probe() {
 
 autotune_finish() {
     STATE_FILE="$DATA_DIR/.autotune_state"
+    TARGET_IP=""
+    WAS_RUNNING="1"
     if [ -f "$STATE_FILE" ]; then
         TARGET_IP=$(cut -d'|' -f1 "$STATE_FILE" 2>/dev/null)
         WAS_RUNNING=$(cut -d'|' -f2 "$STATE_FILE" 2>/dev/null)
-        if [ -n "$TARGET_IP" ]; then
-            iptables -t mangle -D OUTPUT -d "$TARGET_IP" -p tcp --dport 443 -j NFQUEUE --queue-num "$QNUM" --queue-bypass 2>/dev/null
-        fi
         rm -f "$STATE_FILE"
-        if [ "$WAS_RUNNING" = "1" ]; then
-            start_nfqws
-        fi
+    fi
+    if [ -n "$TARGET_IP" ]; then
+        iptables -t mangle -D OUTPUT -d "$TARGET_IP" -p tcp --dport 443 -j NFQUEUE --queue-num "$QNUM" --queue-bypass 2>/dev/null
+    fi
+    killall -9 nfqws 2>/dev/null
+    if [ "$WAS_RUNNING" = "1" ] || grep -qcvE '^[[:space:]]*(#|$)' "$CONF" 2>/dev/null; then
+        start
     fi
     echo "FINISHED"
 }
