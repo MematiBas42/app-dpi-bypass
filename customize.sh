@@ -9,6 +9,22 @@ if [ ! -f /data/adb/app-dpi-bypass/apps.list ]; then
     ui_print "- Varsayılan apps.list oluşturuluyor..."
     cp "$MODPATH/apps.list" /data/adb/app-dpi-bypass/apps.list
 fi
+if [ ! -f /data/adb/app-dpi-bypass/config.conf ]; then
+    ui_print "- Varsayılan config.conf oluşturuluyor..."
+    cp "$MODPATH/config.conf" /data/adb/app-dpi-bypass/config.conf
+else
+    # Mevcut config varsa eksik DNS parametrelerini ekle
+    grep -q "DNS_ENABLED" /data/adb/app-dpi-bypass/config.conf || cat << "EOF" >> /data/adb/app-dpi-bypass/config.conf
+
+# Per-App DoH / DNS Ayarları (Zygisk Entegrasyonu)
+DNS_ENABLED="1"
+DNS_PRESET="cloudflare"
+DNS_UPSTREAM="https://1.1.1.1/dns-query"
+EOF
+fi
+if [ ! -f /data/adb/app-dpi-bypass/custom_profiles.json ]; then
+    echo "[]" > /data/adb/app-dpi-bypass/custom_profiles.json
+fi
 
 ui_print "- Dosya izinleri ayarlanıyor..."
 set_perm_recursive "$MODPATH" 0 0 0755 0644
@@ -17,6 +33,9 @@ set_perm "$MODPATH/action.sh" 0 0 0755
 set_perm "$MODPATH/service.sh" 0 0 0755
 set_perm "$MODPATH/uninstall.sh" 0 0 0755
 set_perm "$MODPATH/bin/nfqws" 0 0 0755
+[ -f "$MODPATH/bin/doh_forwarder" ] && set_perm "$MODPATH/bin/doh_forwarder" 0 0 0755
+[ -f "$MODPATH/zygisk/arm64-v8a.so" ] && set_perm "$MODPATH/zygisk/arm64-v8a.so" 0 0 0755
+[ -f "$MODPATH/zygisk/armeabi-v7a.so" ] && set_perm "$MODPATH/zygisk/armeabi-v7a.so" 0 0 0755
 set_perm_recursive "$MODPATH/webroot" 0 0 0755 0644
 
 # Eski discord-dpi-bypass kalıntısı varsa temizle

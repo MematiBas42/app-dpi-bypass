@@ -21,7 +21,9 @@ zip -r9 "$TARGET_ZIP" \
     uninstall.sh \
     dpi_ctl.sh \
     apps.list \
+    config.conf \
     bin \
+    zygisk \
     webroot
 
 cp -f "$TARGET_ZIP" "$DIST_DIR/app-dpi-bypass.zip"

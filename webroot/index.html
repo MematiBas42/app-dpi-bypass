@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="tr">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
@@ -20,6 +20,8 @@
   --good-soft: rgba(16, 185, 129, 0.15);
   --danger: #ef4444;
   --danger-soft: rgba(239, 68, 68, 0.15);
+  --warn: #f59e0b;
+  --warn-soft: rgba(245, 158, 11, 0.15);
   --track: #374151;
   --track-on: #3b82f6;
   --thumb: #ffffff;
@@ -42,6 +44,8 @@
     --good-soft: rgba(5, 150, 105, 0.12);
     --danger: #dc2626;
     --danger-soft: rgba(220, 38, 38, 0.12);
+    --warn: #d97706;
+    --warn-soft: rgba(217, 119, 6, 0.12);
     --track: #d1d5db;
     --track-on: #2563eb;
     --thumb: #ffffff;
@@ -60,7 +64,7 @@ body {
   -webkit-user-select: none;
 }
 .app-container {
-  max-width: 580px;
+  max-width: 600px;
   margin: 0 auto;
   padding: 16px 16px env(safe-area-inset-bottom, 16px);
 }
@@ -68,7 +72,7 @@ header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 4px 16px;
+  padding: 8px 4px 14px;
 }
 .title-group h1 {
   margin: 0;
@@ -134,25 +138,28 @@ header {
 /* Metrics Grid */
 .metrics-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
   margin-top: 14px;
   padding-top: 12px;
   border-top: 1px solid var(--line);
 }
 .metric-box {
   background: var(--field);
-  padding: 8px 10px;
+  padding: 8px 6px;
   border-radius: 12px;
   text-align: center;
 }
 .metric-val {
-  font-size: 15px;
+  font-size: 13.5px;
   font-weight: 700;
   color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .metric-lbl {
-  font-size: 11px;
+  font-size: 10.5px;
   color: var(--sub);
   margin-top: 2px;
 }
@@ -193,7 +200,48 @@ input:checked + .slider:before {
   transform: translateX(22px);
 }
 
-/* Presets */
+/* Top Segmented Navigation */
+.nav-segmented {
+  display: flex;
+  background: var(--card);
+  border: 1px solid var(--line);
+  padding: 4px;
+  border-radius: 14px;
+  margin-bottom: 16px;
+  gap: 4px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.nav-btn {
+  flex: 1;
+  min-width: max-content;
+  padding: 9px 12px;
+  border: none;
+  background: transparent;
+  color: var(--sub);
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all .2s;
+  text-align: center;
+  white-space: nowrap;
+}
+.nav-btn.active {
+  background: var(--field);
+  color: var(--ink);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+/* View Panels */
+.view-panel {
+  display: none;
+}
+.view-panel.active {
+  display: block;
+}
+
+/* Section Titles & Buttons */
 .section-title {
   font-size: 13px;
   font-weight: 700;
@@ -202,6 +250,34 @@ input:checked + .slider:before {
   color: var(--sub);
   margin: 16px 4px 8px;
 }
+.btn-sm {
+  background: var(--field);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 6px 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all .15s;
+}
+.btn-sm:active { opacity: 0.7; }
+.btn-icon {
+  background: transparent;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  opacity: 0.8;
+  transition: transform .1s, opacity .1s;
+}
+.btn-icon:active { opacity: 1; transform: scale(1.15); }
+
+/* Presets & Chips */
 .presets-scroller {
   display: flex;
   gap: 8px;
@@ -318,7 +394,7 @@ input:checked + .slider:before {
   min-width: 0;
 }
 .app-name {
-  font-size: 15px;
+  font-size: 14.5px;
   font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
@@ -330,72 +406,290 @@ input:checked + .slider:before {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin-top: 2px;
+  margin-top: 1px;
 }
 .app-uid-badge {
   display: inline-block;
-  background: var(--field);
   padding: 1px 6px;
   border-radius: 4px;
+  background: var(--field);
   font-size: 10.5px;
+  font-family: monospace;
   color: var(--faint);
   margin-left: 4px;
-  font-family: monospace;
 }
 
-/* Bottom Bar */
-.bottom-bar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
+/* Preset Cards */
+.preset-card {
   background: var(--card);
-  border-top: 1px solid var(--line);
-  padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+  border: 1.5px solid var(--line);
+  border-radius: 18px;
+  padding: 16px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: all .2s;
+  position: relative;
+}
+.preset-card:active {
+  background: var(--card-press);
+}
+.preset-card.active-preset {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.preset-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  z-index: 100;
-  box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+  margin-bottom: 6px;
 }
-.bottom-summary {
-  font-size: 13px;
-  font-weight: 600;
+.preset-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.preset-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--good-soft);
+  color: var(--good);
+}
+.preset-desc {
+  font-size: 12.5px;
+  color: var(--sub);
+  line-height: 1.45;
+  margin-bottom: 10px;
+}
+.preset-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.tag-pill {
+  font-size: 11px;
+  font-family: monospace;
+  background: var(--field);
+  padding: 3px 8px;
+  border-radius: 6px;
   color: var(--sub);
 }
-.bottom-summary b {
-  color: var(--ink);
-  font-size: 14px;
+
+/* Empty Custom Profiles Banner */
+.empty-custom-box {
+  background: var(--field);
+  border: 1.5px dashed var(--line);
+  border-radius: 16px;
+  padding: 18px 14px;
+  text-align: center;
+  margin-bottom: 16px;
 }
-.btn-save {
+.empty-custom-box p {
+  margin: 0 0 10px;
+  font-size: 12.5px;
+  color: var(--sub);
+}
+
+/* Auto-Tune View */
+.autotune-box {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 16px;
+  margin-bottom: 14px;
+}
+.autotune-input-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 14px 0;
+}
+.autotune-input {
+  flex: 1 1 180px;
+  min-width: 0;
+  background: var(--field);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 14px;
+  outline: none;
+}
+.autotune-input-row .btn-primary {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  justify-content: center;
+  padding: 10px 16px;
+}
+@media (max-width: 440px) {
+  .autotune-input-row .btn-primary {
+    width: 100%;
+  }
+}
+.btn-primary {
   background: var(--accent);
   color: #fff;
   border: none;
-  padding: 11px 20px;
   border-radius: 12px;
-  font-size: 14px;
+  padding: 10px 18px;
+  font-size: 13.5px;
   font-weight: 700;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 6px;
-  transition: transform .1s, opacity .2s;
+  transition: opacity .2s;
 }
-.btn-save:active { transform: scale(0.97); }
+.btn-primary:active { opacity: 0.8; }
+.btn-secondary {
+  background: var(--field);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.strategy-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: var(--field);
+  border-radius: 12px;
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+.strategy-status {
+  font-weight: 700;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.strategy-status.success { color: var(--good); }
+.strategy-status.failed { color: var(--danger); }
+.strategy-status.testing { color: var(--warn); }
+.strategy-status.waiting { color: var(--faint); }
+
+.winner-banner {
+  background: var(--good-soft);
+  border: 1px solid var(--good);
+  color: var(--good);
+  padding: 14px;
+  border-radius: 16px;
+  margin-top: 14px;
+  display: none;
+}
+.winner-banner h4 {
+  margin: 0 0 6px;
+  font-size: 15px;
+}
+.winner-banner p {
+  margin: 0 0 12px;
+  font-size: 12.5px;
+  color: var(--ink);
+}
+
+/* Manual Form Controls */
+.form-group {
+  margin-bottom: 14px;
+}
+.form-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--sub);
+  margin-bottom: 6px;
+}
+.form-select, .form-input {
+  width: 100%;
+  background: var(--field);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  outline: none;
+  font-family: inherit;
+}
+.form-select option {
+  background: var(--card);
+  color: var(--ink);
+}
+.cli-box {
+  background: #000000;
+  border: 1px solid var(--line);
+  color: #10b981;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11.5px;
+  line-height: 1.45;
+  padding: 12px;
+  border-radius: 14px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+/* Sticky Bottom Bar */
+.bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(12, 13, 14, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid var(--line);
+  padding: 12px 16px env(safe-area-inset-bottom, 12px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 100;
+}
+.bottom-summary {
+  font-size: 13.5px;
+  color: var(--sub);
+}
+.bottom-summary b {
+  color: var(--ink);
+}
+.btn-save {
+  background: var(--field);
+  color: var(--faint);
+  border: none;
+  border-radius: 14px;
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all .2s;
+}
 .btn-save.dirty {
-  animation: pulse-btn 1.5s infinite;
+  background: var(--accent);
+  color: #ffffff;
+  box-shadow: 0 4px 14px var(--accent-soft);
 }
-@keyframes pulse-btn {
-  0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.6); }
-  70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+.btn-save:active {
+  transform: scale(0.97);
 }
 
 /* Toast */
 .toast {
   position: fixed;
-  bottom: 84px;
+  bottom: 78px;
   left: 50%;
   transform: translateX(-50%) translateY(20px);
   background: rgba(22, 23, 26, 0.95);
@@ -433,11 +727,11 @@ input:checked + .slider:before {
   <header>
     <div class="title-group">
       <h1>App DPI Bypass</h1>
-      <p>Çekirdek Seviyesinde Seçici DPI Bypass (nfqws)</p>
+      <p>Kernel-Level Selective DPI Bypass (nfqws)</p>
     </div>
     <div id="statusPill" class="status-pill">
       <span class="status-dot"></span>
-      <span id="statusText">Pasif</span>
+      <span id="statusText">Inactive</span>
     </div>
   </header>
 
@@ -445,8 +739,8 @@ input:checked + .slider:before {
   <div class="card">
     <div class="power-row">
       <div class="power-info">
-        <h3>Modül Durumu</h3>
-        <span id="powerDesc">nfqws ve Netfilter yönlendirmesi</span>
+        <h3>Module Status</h3>
+        <span id="powerDesc">nfqws &amp; Netfilter redirection</span>
       </div>
       <label class="switch">
         <input type="checkbox" id="powerToggle">
@@ -460,52 +754,430 @@ input:checked + .slider:before {
       </div>
       <div class="metric-box">
         <div class="metric-val" id="metricApps">0</div>
-        <div class="metric-lbl">Seçili Uygulama</div>
+        <div class="metric-lbl">Apps</div>
+      </div>
+      <div class="metric-box">
+        <div class="metric-val" id="metricMode">Preset</div>
+        <div class="metric-lbl">Mode</div>
       </div>
       <div class="metric-box">
         <div class="metric-val" id="metricData">0 KB</div>
-        <div class="metric-lbl">İşlenen Veri</div>
+        <div class="metric-lbl">Data</div>
       </div>
     </div>
   </div>
 
-  <!-- Presets -->
-  <div class="section-title">Popüler Uygulamalar</div>
-  <div class="presets-scroller" id="presetsBar">
-    <div class="chip" data-pkg="com.discord">Discord</div>
-    <div class="chip" data-pkg="com.roblox.client">Roblox</div>
-    <div class="chip" data-pkg="wp.wattpad">Wattpad</div>
-    <div class="chip" data-pkg="com.twitter.android">X (Twitter)</div>
-    <div class="chip" data-pkg="org.telegram.messenger">Telegram</div>
-    <div class="chip" data-pkg="com.instagram.android">Instagram</div>
+  <!-- Segmented Navigation Bar -->
+  <div class="nav-segmented">
+    <button class="nav-btn active" data-view="apps">📱 Apps</button>
+    <button class="nav-btn" data-view="presets">⚡ Presets</button>
+    <button class="nav-btn" data-view="autotune">🔍 Auto-Tune</button>
+    <button class="nav-btn" data-view="dns">🌐 DoH</button>
+    <button class="nav-btn" data-view="manual">🛠️ Advanced</button>
   </div>
 
-  <!-- App Selection Section -->
-  <div class="section-title">Uygulama Seçimi</div>
-  
-  <div class="search-bar">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="11" cy="11" r="8"></circle>
-      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-    </svg>
-    <input type="text" id="searchInput" placeholder="Uygulama veya paket adı ara...">
+  <!-- VIEW 1: APPS SELECTION -->
+  <div class="view-panel active" id="viewApps">
+    <div class="section-title">Popular Applications</div>
+    <div class="presets-scroller" id="presetsBar">
+      <div class="chip" data-pkg="com.discord">Discord</div>
+      <div class="chip" data-pkg="com.roblox.client">Roblox</div>
+      <div class="chip" data-pkg="wp.wattpad">Wattpad</div>
+      <div class="chip" data-pkg="com.twitter.android">X (Twitter)</div>
+      <div class="chip" data-pkg="org.telegram.messenger">Telegram</div>
+      <div class="chip" data-pkg="com.instagram.android">Instagram</div>
+    </div>
+
+    <div class="section-title">Application Selection</div>
+    <div class="search-bar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input type="text" id="searchInput" placeholder="Search application or package name...">
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" data-tab="user">User (<span id="countUser">0</span>)</div>
+      <div class="tab" data-tab="selected">Selected (<span id="countSelected">0</span>)</div>
+      <div class="tab" data-tab="all">All (<span id="countAll">0</span>)</div>
+    </div>
+
+    <div class="app-list" id="appList">
+      <div class="empty-msg">Loading applications...</div>
+    </div>
   </div>
 
-  <div class="tabs">
-    <div class="tab active" data-tab="user">Kullanıcı (<span id="countUser">0</span>)</div>
-    <div class="tab" data-tab="selected">Seçilenler (<span id="countSelected">0</span>)</div>
-    <div class="tab" data-tab="all">Tümü (<span id="countAll">0</span>)</div>
+  <!-- VIEW 2: PRESETS & CUSTOM PROFILES -->
+  <div class="view-panel" id="viewPresets">
+    <!-- Custom Profiles Section Header & Add Button (Directly above built-in presets) -->
+    <div style="display: flex; align-items: center; justify-content: space-between; margin: 16px 4px 8px;">
+      <div class="section-title" style="margin: 0;">Custom Profiles</div>
+      <button id="btnNewCustomProfile" class="btn-sm" style="background: var(--accent); color: #fff;">
+        + New Profile / Paste
+      </button>
+    </div>
+
+    <!-- Custom Profile Editor / Paste Modal Card -->
+    <div id="customProfileEditor" class="card" style="display: none; border-color: var(--accent); margin-bottom: 14px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+        <h3 id="editorTitle" style="margin: 0; font-size: 15px; font-weight: 700;">New Custom Profile</h3>
+        <button id="btnCloseEditor" style="background: transparent; border: none; color: var(--sub); font-size: 18px; cursor: pointer;">✕</button>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Profile Name</label>
+        <input type="text" id="customProfName" class="form-input" placeholder="e.g. Strict ISP Bypass">
+      </div>
+      <div class="form-group">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+          <label class="form-label" style="margin-bottom: 0;">nfqws Arguments or Command</label>
+          <button type="button" id="btnPasteEditorArgs" class="btn-sm">📋 Paste from Clipboard</button>
+        </div>
+        <textarea id="customProfArgs" class="form-input" style="height: 72px; font-family: monospace; font-size: 12px; resize: vertical;" placeholder="--filter-tcp=80,443 --dpi-desync=fake --dpi-desync-fooling=md5sig ..."></textarea>
+        <span style="font-size: 11px; color: var(--faint); margin-top: 4px; display: block;">
+          Even if you paste a full 'nfqws --daemon ...' command, daemon and queue flags are automatically parsed out.
+        </span>
+      </div>
+      <div style="display: flex; gap: 8px; margin-top: 12px;">
+        <button id="btnSaveCustomProf" class="btn-primary" style="flex: 1; justify-content: center;">Save &amp; Apply</button>
+        <button id="btnCancelEditor" class="btn-secondary" style="flex: 0 0 auto;">Cancel</button>
+      </div>
+    </div>
+
+    <!-- Custom Profiles Dynamic Container -->
+    <div id="customProfilesList"></div>
+
+    <!-- Built-in Presets Section Header -->
+    <div class="section-title">Built-in Presets</div>
+    
+    <div class="preset-card" data-preset="discord_optimal">
+      <div class="preset-header">
+        <div class="preset-title">🎧 Discord &amp; WebRTC Optimal</div>
+        <span class="preset-badge">Recommended</span>
+      </div>
+      <div class="preset-desc">
+        Dedicated TCP fake (md5sig) and dual UDP desync engine for Discord voice, video, and media streams. Ensures optimal voice latency across strict ISPs.
+      </div>
+      <div class="preset-tags">
+        <span class="tag-pill">fake + md5sig</span>
+        <span class="tag-pill">UDP fake x2</span>
+        <span class="tag-pill">WebRTC 50000-65535</span>
+      </div>
+    </div>
+
+    <div class="preset-card" data-preset="split_sni_compatible">
+      <div class="preset-header">
+        <div class="preset-title">🛡️ Maximum Kernel Compatibility</div>
+      </div>
+      <div class="preset-desc">
+        Safe TLS SNI splitting for kernels and older devices that reject custom TCP options (md5sig). Operates with zero system constraints.
+      </div>
+      <div class="preset-tags">
+        <span class="tag-pill">split=sni</span>
+        <span class="tag-pill">Universal Support</span>
+      </div>
+    </div>
+
+    <div class="preset-card" data-preset="fake_badsum_autottl">
+      <div class="preset-header">
+        <div class="preset-title">⚡ Strict ISP Censorship Bypass</div>
+      </div>
+      <div class="preset-desc">
+        Combines corrupted checksums (badsum) with dynamic TTL reduction (autottl=-1) against aggressive deep packet inspection firewalls.
+      </div>
+      <div class="preset-tags">
+        <span class="tag-pill">fake + badsum</span>
+        <span class="tag-pill">autottl=-1</span>
+        <span class="tag-pill">Aggressive</span>
+      </div>
+    </div>
+
+    <div class="preset-card" data-preset="multisplit_midsni">
+      <div class="preset-header">
+        <div class="preset-title">🧩 Multisplit &amp; Midsni</div>
+      </div>
+      <div class="preset-desc">
+        Dual-stage splitting of ClientHello at byte 2 and the middle of the SNI hostname to evade modern multi-stage DPI hardware.
+      </div>
+      <div class="preset-tags">
+        <span class="tag-pill">multisplit=2,midsni</span>
+        <span class="tag-pill">Deep Inspection Bypass</span>
+      </div>
+    </div>
+
+    <div class="preset-card" data-preset="disorder_sni">
+      <div class="preset-header">
+        <div class="preset-title">🔀 Disorder SNI</div>
+      </div>
+      <div class="preset-desc">
+        Sends packet segments intentionally out of order. Confuses packet reassembly engines on filter middleboxes while servers reorder normally.
+      </div>
+      <div class="preset-tags">
+        <span class="tag-pill">disorder=sni</span>
+        <span class="tag-pill">TCP Reassembly Trick</span>
+      </div>
+    </div>
   </div>
 
-  <div class="app-list" id="appList">
-    <div class="empty-msg">Uygulamalar yükleniyor...</div>
+  <!-- VIEW 3: AUTO-TUNE (STRATEGY BENCHMARK) -->
+  <div class="view-panel" id="viewAutotune">
+    <div class="autotune-box">
+      <h3 style="margin: 0 0 6px; font-size: 16px;">🔍 Automatic Strategy Detector</h3>
+      <p style="margin: 0; font-size: 13px; color: var(--sub); line-height: 1.45;">
+        Tests your current ISP against blocked targets by probing desync techniques with live handshakes to identify the lowest latency profile.
+      </p>
+
+      <div class="autotune-input-row">
+        <input type="text" id="autoTuneDomain" class="autotune-input" value="discord.com" placeholder="Target Domain (e.g. discord.com)">
+        <button id="btnStartAutoTune" class="btn-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+          Run Benchmark
+        </button>
+      </div>
+
+      <div id="autoTuneList">
+        <div class="strategy-row" data-strat="discord_optimal">
+          <span>🎧 Discord &amp; WebRTC Optimal</span>
+          <span class="strategy-status waiting">Pending</span>
+        </div>
+        <div class="strategy-row" data-strat="split_sni_compatible">
+          <span>🛡️ Maximum Compatibility (Split SNI)</span>
+          <span class="strategy-status waiting">Pending</span>
+        </div>
+        <div class="strategy-row" data-strat="fake_badsum_autottl">
+          <span>⚡ Strict Censorship Bypass (Badsum)</span>
+          <span class="strategy-status waiting">Pending</span>
+        </div>
+        <div class="strategy-row" data-strat="multisplit_midsni">
+          <span>🧩 Multisplit &amp; Midsni</span>
+          <span class="strategy-status waiting">Pending</span>
+        </div>
+        <div class="strategy-row" data-strat="disorder_sni">
+          <span>🔀 Disorder SNI</span>
+          <span class="strategy-status waiting">Pending</span>
+        </div>
+      </div>
+
+      <div id="winnerBanner" class="winner-banner">
+        <h4 id="winnerTitle">🏆 Optimal Strategy Identified!</h4>
+        <p id="winnerDesc">-</p>
+        <button id="btnApplyWinner" class="btn-primary" style="background: var(--good); width: 100%; justify-content: center;">
+          Save &amp; Apply This Strategy
+        </button>
+      </div>
+    </div>
   </div>
+
+  <!-- VIEW 4: PER-APP DoH -->
+  <div class="view-panel" id="viewDns">
+    <!-- Scope Notice Banner -->
+    <div style="background: rgba(88, 101, 242, 0.08); border: 1px solid rgba(88, 101, 242, 0.25); border-radius: 14px; padding: 14px 16px; margin-bottom: 16px;">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+        <span style="font-size: 16px;">🎯</span>
+        <span style="font-size: 13px; font-weight: 700; color: var(--accent);">Per-App Target Scope</span>
+      </div>
+      <p style="margin: 0; font-size: 11.5px; color: var(--sub); line-height: 1.45;">
+        This DNS over HTTPS (DoH) engine is enforced <b>only for your selected applications</b> via Zygisk inline hooking (DobbyHook in <code style="color: var(--ink);">libc.so</code>). Unselected apps and system daemons bypass this entirely and use standard system DNS with zero detection footprint.
+      </p>
+    </div>
+
+    <!-- DNS Status & Control Card -->
+    <div class="card" style="margin-bottom: 16px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+        <div>
+          <div style="font-size: 14px; font-weight: 700; color: var(--ink);">Per-App DoH</div>
+          <div style="font-size: 11px; color: var(--sub);">Intercept DNS queries for selected apps</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="dnsEnableToggle">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+        <div style="background: var(--field); padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line);">
+          <div style="font-size: 10.5px; color: var(--sub); margin-bottom: 3px;">DoH Forwarder</div>
+          <div id="dnsDaemonStatus" style="font-size: 12.5px; font-weight: 700; color: var(--sub);">Checking...</div>
+        </div>
+        <div style="background: var(--field); padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line);">
+          <div style="font-size: 10.5px; color: var(--sub); margin-bottom: 3px;">Zygisk Module</div>
+          <div id="dnsZygiskStatus" style="font-size: 12.5px; font-weight: 700; color: var(--accent);">Ready</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Provider Configuration Card -->
+    <div class="card" style="margin-bottom: 16px;">
+      <div class="section-title" style="margin-bottom: 12px;">DoH Upstream Configuration</div>
+
+      <!-- Quick Presets Dropdown -->
+      <div class="form-group">
+        <label class="form-label">Popular Providers</label>
+        <select id="dnsProviderSelect" class="form-select">
+          <option value="https://1.1.1.1/dns-query" data-preset="cloudflare">Cloudflare DNS (Default • Fast • 1.1.1.1)</option>
+          <option value="https://security.cloudflare-dns.com/dns-query" data-preset="cloudflare_security">Cloudflare Security (Malware Protection)</option>
+          <option value="https://dns.google/dns-query" data-preset="google">Google Public DNS (dns.google)</option>
+          <option value="https://dns.adguard-dns.com/dns-query" data-preset="adguard">AdGuard DNS (Ad &amp; Tracker Blocking)</option>
+          <option value="https://dns.quad9.net/dns-query" data-preset="quad9">Quad9 DNS (Malware Blocking • Privacy)</option>
+          <option value="https://dns.mullvad.net/dns-query" data-preset="mullvad">Mullvad DNS (Zero-Logging Privacy)</option>
+          <option value="https://freedns.controld.com/p0" data-preset="controld">Control D (Unfiltered Free)</option>
+          <option value="custom" data-preset="custom">✏️ Custom / Manual URL Entry</option>
+        </select>
+      </div>
+
+      <!-- Manual URL Input -->
+      <div class="form-group">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+          <label class="form-label" style="margin-bottom: 0;">DoH Endpoint URL</label>
+          <button type="button" id="btnPasteDnsUrl" class="btn-sm">📋 Paste</button>
+        </div>
+        <input type="text" id="dnsUpstreamInput" class="form-input" placeholder="https://1.1.1.1/dns-query">
+        <div style="font-size: 10.5px; color: var(--sub); margin-top: 4px;">Supports any RFC 8484 compliant DoH server (NextDNS, AdGuard Home, Pi-hole, Cloudflare).</div>
+      </div>
+
+      <button id="btnSaveDns" class="btn-primary" style="width: 100%; justify-content: center; padding: 13px; margin-top: 4px;">
+        Save &amp; Apply DoH
+      </button>
+    </div>
+
+    <!-- Live Test Card -->
+    <div class="card" style="margin-bottom: 16px;">
+      <div class="section-title" style="margin-bottom: 12px;">Diagnostic DoH Resolution Test</div>
+      <div class="form-group">
+        <label class="form-label">Domain to Resolve</label>
+        <div style="display: flex; gap: 8px;">
+          <input type="text" id="dnsTestDomain" class="form-input" value="discord.com" placeholder="e.g. discord.com" style="flex: 1;">
+          <button type="button" id="btnRunDnsTest" class="btn-sm" style="background: var(--accent); color: #fff; padding: 0 16px; font-weight: 700;">
+            🚀 Test
+          </button>
+        </div>
+      </div>
+
+      <div id="dnsTestResultBox" style="display: none; margin-top: 10px; padding: 12px; background: var(--field); border-radius: 10px; border: 1px solid var(--line); font-size: 12px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+          <span id="dnsTestStatusBadge" class="badge">Success</span>
+          <span id="dnsTestLatency" style="font-family: monospace; font-weight: 700; color: var(--ink);">0ms</span>
+        </div>
+        <div style="font-size: 10.5px; color: var(--sub); margin-bottom: 2px;">Resolved IP Addresses:</div>
+        <div id="dnsTestIps" style="font-family: monospace; color: var(--ink); word-break: break-all;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIEW 5: ADVANCED (MANUAL TUNING) -->
+  <div class="view-panel" id="viewManual">
+    <div class="card">
+      <div class="power-row" style="margin-bottom: 14px;">
+        <div class="power-info">
+          <h3>Manual Mode</h3>
+          <span>Fine-tune nfqws desync parameters manually</span>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="manualModeToggle">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">TCP Desync Method</label>
+        <select id="cfgTcpDesync" class="form-select">
+          <option value="fake">Fake Packet (fake)</option>
+          <option value="split">Split (split)</option>
+          <option value="disorder">Disorder (disorder)</option>
+          <option value="multisplit">Multisplit (multisplit)</option>
+        </select>
+      </div>
+
+      <div class="form-group" id="groupSplitPos">
+        <label class="form-label">Split Position (split-pos)</label>
+        <select id="cfgSplitPos" class="form-select">
+          <option value="sni">SNI Start (sni)</option>
+          <option value="2,midsni">Byte 2 &amp; Middle SNI (2,midsni)</option>
+          <option value="midsni">Middle SNI (midsni)</option>
+          <option value="1">Byte 1 (1)</option>
+          <option value="2">Byte 2 (2)</option>
+          <option value="3">Byte 3 (3)</option>
+        </select>
+      </div>
+
+      <div class="form-group" id="groupFooling">
+        <label class="form-label">TCP Fooling Method</label>
+        <select id="cfgFooling" class="form-select">
+          <option value="md5sig">TCP MD5 Signature (md5sig)</option>
+          <option value="badsum">Bad Checksum (badsum)</option>
+          <option value="badseq">Bad Sequence (badseq)</option>
+          <option value="datanoack">Data No-ACK (datanoack)</option>
+          <option value="none">None (none)</option>
+        </select>
+      </div>
+
+      <div class="form-group" id="groupTtlMode">
+        <label class="form-label">TTL Handling</label>
+        <select id="cfgTtlMode" class="form-select">
+          <option value="none">Default / Disabled</option>
+          <option value="auto">Auto Hop Distance (autottl=-1)</option>
+          <option value="custom">Custom Fixed TTL Value</option>
+        </select>
+      </div>
+
+      <div class="form-group" id="groupTtlVal" style="display: none;">
+        <label class="form-label">Custom TTL Value (1 - 64)</label>
+        <input type="number" id="cfgTtlVal" class="form-input" min="1" max="64" value="8">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">TCP Filter Ports</label>
+        <input type="text" id="cfgTcpPorts" class="form-input" value="80,443,2053,2083,2087,2096,8443">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">UDP / WebRTC Desync</label>
+        <select id="cfgUdpDesync" class="form-select">
+          <option value="fake">Fake Packet (Repeats)</option>
+          <option value="none">Disabled</option>
+        </select>
+      </div>
+
+      <div class="form-group" id="groupUdpRepeats">
+        <label class="form-label">UDP Repeat Count</label>
+        <select id="cfgUdpRepeats" class="form-select">
+          <option value="1">1 Repeat</option>
+          <option value="2">2 Repeats (Recommended)</option>
+          <option value="3">3 Repeats</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Expert Extra Flags (Raw Args)</label>
+        <input type="text" id="cfgExtraArgs" class="form-input" placeholder="e.g. --dpi-desync-fake-tls=...">
+      </div>
+
+      <!-- Live Command Preview with Paste and Copy Buttons -->
+      <div class="form-group">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+          <label class="form-label" style="margin-bottom: 0;">Live Command Preview (CLI)</label>
+          <div style="display: flex; gap: 6px;">
+            <button type="button" id="btnPasteCli" class="btn-sm">📋 Paste</button>
+            <button type="button" id="btnCopyCli" class="btn-sm">📄 Copy</button>
+          </div>
+        </div>
+        <pre id="cliPreview" class="cli-box"></pre>
+      </div>
+
+      <button id="btnSaveManual" class="btn-primary" style="width: 100%; justify-content: center; padding: 13px;">
+        Save &amp; Apply Manual Settings
+      </button>
+    </div>
+  </div>
+
 </div>
 
-<!-- Sticky Bottom Bar -->
-<div class="bottom-bar">
+<!-- Sticky Bottom Bar (For Apps View) -->
+<div class="bottom-bar" id="stickyBottomBar">
   <div class="bottom-summary">
-    <span id="selectedSummary"><b>0</b> uygulama seçili</span>
+    <span id="selectedSummary"><b>0</b> apps selected</span>
   </div>
   <button id="btnSave" class="btn-save">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -513,7 +1185,7 @@ input:checked + .slider:before {
       <polyline points="17 21 17 13 7 13 7 21"></polyline>
       <polyline points="7 3 7 8 15 8"></polyline>
     </svg>
-    Kaydet ve Uygula
+    Save &amp; Apply
   </button>
 </div>
 
@@ -524,7 +1196,6 @@ input:checked + .slider:before {
   "use strict";
 
   var MOD_DIR = "/data/adb/modules/app-dpi-bypass";
-  // Geriye dönük uyumluluk kontrolü
   var SCRIPT = "sh " + MOD_DIR + "/dpi_ctl.sh";
 
   var state = {
@@ -534,16 +1205,43 @@ input:checked + .slider:before {
     bytes: 0,
     selected: new Set(),
     initialSelected: new Set(),
-    apps: [], // { pkg, uid, user, label }
+    apps: [],
+    customProfiles: [],
+    editingProfileId: null,
     activeTab: "user",
-    filterText: ""
+    activeView: "apps",
+    filterText: "",
+    config: {
+      DPI_MODE: "preset",
+      PRESET_NAME: "discord_optimal",
+      CUSTOM_PROFILE_NAME: "",
+      CUSTOM_PROFILE_ARGS: "",
+      TCP_DESYNC: "fake",
+      TCP_SPLIT_POS: "sni",
+      TCP_FOOLING: "md5sig",
+      TCP_TTL_MODE: "none",
+      TCP_TTL_VALUE: "8",
+      TCP_PORTS: "80,443,2053,2083,2087,2096,8443",
+      UDP_DESYNC: "fake",
+      UDP_REPEATS: "2",
+      UDP_PORTS: "50000-65535,19294-19344",
+      UDP_FILTER_L7: "discord",
+      CUSTOM_EXTRA_ARGS: "",
+      AUTO_TARGET_DOMAIN: "discord.com"
+    },
+    dns: {
+      active: false,
+      pid: 0,
+      enabled: "1",
+      preset: "cloudflare",
+      upstream: "https://1.1.1.1/dns-query",
+      zygiskInstalled: true
+    }
   };
 
-  // KernelSU / APatch root bridge
   function ksuExec(cmd) {
     return new Promise(function(resolve) {
       if (typeof ksu === "undefined" || !ksu.exec) {
-        // Tarayıcı simülasyonu fallback
         console.warn("[KSU Mock] Exec:", cmd);
         resolve({ errno: 0, stdout: "", stderr: "no ksu bridge" });
         return;
@@ -585,16 +1283,45 @@ input:checked + .slider:before {
     return last.charAt(0).toUpperCase() + last.slice(1);
   }
 
+  function getClipboardText() {
+    if (navigator.clipboard && navigator.clipboard.readText) {
+      return navigator.clipboard.readText().catch(function() {
+        return prompt("Please paste the command or arguments here:");
+      });
+    }
+    return Promise.resolve(prompt("Please paste the command or arguments here:"));
+  }
+
+  function cleanNfqwsCommand(raw) {
+    if (!raw) return "";
+    var str = String(raw).trim();
+    str = str.replace(/^["']|["']$/g, "");
+    str = str.replace(/^(?:\/.*?\/)?(?:bin\/)?nfqws\s+/i, "");
+    str = str.replace(/^\.\/nfqws\s+/i, "");
+    str = str.replace(/--daemon\s*/gi, "");
+    str = str.replace(/--uid=[^\s]+\s*/gi, "");
+    str = str.replace(/--qnum=[^\s]+\s*/gi, "");
+    str = str.replace(/--pidfile=[^\s]+\s*/gi, "");
+    return str.trim();
+  }
+
   function loadData() {
     return ksuExec(SCRIPT + " get-data").then(function(res) {
       var out = res.stdout || "";
-      var statusPart = "", selectedPart = "", appsPart = "";
-      var mStatus = out.match(/---STATUS---([\s\S]*?)(?:---SELECTED---|---APPS---|$)/);
+      var statusPart = "", selectedPart = "", appsPart = "", configPart = "", customPart = "", dnsPart = "";
+
+      var mStatus = out.match(/---STATUS---([\s\S]*?)(?:---SELECTED---|---APPS---|---CONFIG---|---CUSTOM-PROFILES---|---DNS-STATUS---|$)/);
       if (mStatus) statusPart = mStatus[1].trim();
-      var mSelected = out.match(/---SELECTED---([\s\S]*?)(?:---APPS---|$)/);
+      var mSelected = out.match(/---SELECTED---([\s\S]*?)(?:---APPS---|---CONFIG---|---CUSTOM-PROFILES---|---DNS-STATUS---|$)/);
       if (mSelected) selectedPart = mSelected[1].trim();
-      var mApps = out.match(/---APPS---([\s\S]*)$/);
+      var mApps = out.match(/---APPS---([\s\S]*?)(?:---CONFIG---|---CUSTOM-PROFILES---|---DNS-STATUS---|$)/);
       if (mApps) appsPart = mApps[1].trim();
+      var mConfig = out.match(/---CONFIG---([\s\S]*?)(?:---CUSTOM-PROFILES---|---DNS-STATUS---|$)/);
+      if (mConfig) configPart = mConfig[1].trim();
+      var mCustom = out.match(/---CUSTOM-PROFILES---([\s\S]*?)(?:---DNS-STATUS---|$)/);
+      if (mCustom) customPart = mCustom[1].trim();
+      var mDns = out.match(/---DNS-STATUS---([\s\S]*)$/);
+      if (mDns) dnsPart = mDns[1].trim();
 
       // 1. Status Parse
       if (statusPart) {
@@ -618,7 +1345,44 @@ input:checked + .slider:before {
         });
       }
 
-      // 3. Apps Parse
+      // 3. Config Parse
+      if (configPart) {
+        configPart.split("\n").forEach(function(line) {
+          var parts = line.split("=");
+          if (parts.length >= 2) {
+            var k = parts[0].trim();
+            var v = parts.slice(1).join("=").trim().replace(/^"/, "").replace(/"$/, "");
+            if (k && !k.startsWith("#")) {
+              state.config[k] = v;
+            }
+          }
+        });
+      }
+
+      // 4. Custom Profiles Parse
+      state.customProfiles = [];
+      if (customPart) {
+        try {
+          var parsed = JSON.parse(customPart);
+          if (Array.isArray(parsed)) state.customProfiles = parsed;
+        } catch(e) {
+          console.warn("Custom profiles parse warning:", e);
+        }
+      }
+
+      // 5. DNS Status Parse
+      if (dnsPart) {
+        var dline = dnsPart.split("\n")[0];
+        var ds = dline.split("|");
+        state.dns.active = (ds[0] === "active");
+        state.dns.pid = parseInt(ds[1], 10) || 0;
+        state.dns.enabled = ds[2] || "1";
+        state.dns.preset = ds[3] || "cloudflare";
+        state.dns.upstream = ds[4] || "https://1.1.1.1/dns-query";
+        state.dns.zygiskInstalled = (ds[5] === "1");
+      }
+
+      // 6. Apps Parse
       state.apps = [];
       var pkgList = [];
       if (appsPart) {
@@ -641,7 +1405,7 @@ input:checked + .slider:before {
         });
       }
 
-      // KernelSU Package Info Resolver (Gerçek uygulama adları)
+      // KernelSU Package Info Resolver
       try {
         if (typeof ksu !== "undefined" && ksu.getPackagesInfo && pkgList.length > 0) {
           var infoStr = ksu.getPackagesInfo(JSON.stringify(pkgList));
@@ -660,7 +1424,6 @@ input:checked + .slider:before {
         console.error("Package info resolution error:", e);
       }
 
-      // Seçili olup listede olmayan paketleri ekle (örnek: yüklü olmayan veya elle eklenmiş)
       state.selected.forEach(function(p) {
         var exists = false;
         for (var j = 0; j < state.apps.length; j++) {
@@ -671,12 +1434,11 @@ input:checked + .slider:before {
             pkg: p,
             uid: "-",
             user: true,
-            label: cleanLabel(p) + " (Yüklü Değil)"
+            label: cleanLabel(p) + " (Not Installed)"
           });
         }
       });
 
-      // Sıralama: Seçili olanlar en üstte, sonra alfabetik etiket
       state.apps.sort(function(a, b) {
         var aSel = state.selected.has(a.pkg);
         var bSel = state.selected.has(b.pkg);
@@ -697,16 +1459,24 @@ input:checked + .slider:before {
 
     if (state.active) {
       pill.className = "status-pill active";
-      statusText.textContent = "Aktif";
+      statusText.textContent = "Active";
       powerToggle.checked = true;
     } else {
       pill.className = "status-pill";
-      statusText.textContent = "Pasif";
+      statusText.textContent = "Inactive";
       powerToggle.checked = false;
     }
 
     document.getElementById("metricPid").textContent = state.active ? state.pid : "-";
     document.getElementById("metricApps").textContent = state.selected.size;
+
+    var modeLabel = "Manual";
+    if (state.config.DPI_MODE === "preset") {
+      modeLabel = cleanPresetLabel(state.config.PRESET_NAME);
+    } else if (state.config.DPI_MODE === "custom") {
+      modeLabel = state.config.CUSTOM_PROFILE_NAME || "Custom";
+    }
+    document.getElementById("metricMode").textContent = modeLabel;
     document.getElementById("metricData").textContent = formatBytes(state.bytes);
 
     // Counts
@@ -722,15 +1492,35 @@ input:checked + .slider:before {
     var boldNum = document.createElement("b");
     boldNum.textContent = String(state.selected.size);
     summaryEl.appendChild(boldNum);
-    summaryEl.appendChild(document.createTextNode(" uygulama seçili"));
+    summaryEl.appendChild(document.createTextNode(" apps selected"));
 
-    // Presets
+    // Presets Bar in Apps View
     var presetChips = document.querySelectorAll("#presetsBar .chip");
     presetChips.forEach(function(chip) {
       var pkg = chip.getAttribute("data-pkg");
       if (state.selected.has(pkg)) chip.classList.add("selected");
       else chip.classList.remove("selected");
     });
+
+    // Preset Cards in Presets View
+    var presetCards = document.querySelectorAll(".preset-card:not(.custom-preset-card)");
+    presetCards.forEach(function(card) {
+      var pname = card.getAttribute("data-preset");
+      if (state.config.DPI_MODE === "preset" && state.config.PRESET_NAME === pname) {
+        card.classList.add("active-preset");
+      } else {
+        card.classList.remove("active-preset");
+      }
+    });
+
+    // Render Custom Profiles
+    renderCustomProfiles();
+
+    // Populate Manual Form Fields
+    syncManualFormWithState();
+
+    // Render DNS Settings
+    renderDnsSettings();
 
     // Check Dirty
     var isDirty = false;
@@ -748,20 +1538,263 @@ input:checked + .slider:before {
     renderList();
   }
 
+  function renderDnsSettings() {
+    var toggle = document.getElementById("dnsEnableToggle");
+    if (toggle) toggle.checked = (state.dns.enabled === "1");
+
+    var daemonEl = document.getElementById("dnsDaemonStatus");
+    if (daemonEl) {
+      if (state.dns.active) {
+        daemonEl.textContent = "Running (PID: " + state.dns.pid + ")";
+        daemonEl.style.color = "var(--green)";
+      } else if (state.dns.enabled === "1") {
+        daemonEl.textContent = "Standby (Port 5354)";
+        daemonEl.style.color = "#faa61a";
+      } else {
+        daemonEl.textContent = "Disabled";
+        daemonEl.style.color = "var(--sub)";
+      }
+    }
+
+    var zygiskEl = document.getElementById("dnsZygiskStatus");
+    if (zygiskEl) {
+      if (state.dns.zygiskInstalled) {
+        zygiskEl.textContent = "ReZygisk Ready 🟢";
+        zygiskEl.style.color = "var(--green)";
+      } else {
+        zygiskEl.textContent = "Not Installed 🔴";
+        zygiskEl.style.color = "#ed4245";
+      }
+    }
+
+    var inp = document.getElementById("dnsUpstreamInput");
+    if (inp && !inp.matches(":focus")) {
+      inp.value = state.dns.upstream || "https://1.1.1.1/dns-query";
+    }
+
+    var sel = document.getElementById("dnsProviderSelect");
+    if (sel && !sel.matches(":focus")) {
+      var found = false;
+      for (var i = 0; i < sel.options.length; i++) {
+        if (sel.options[i].value === state.dns.upstream) {
+          sel.selectedIndex = i;
+          found = true;
+          break;
+        }
+      }
+      if (!found) sel.value = "custom";
+    }
+  }
+
+  function cleanPresetLabel(name) {
+    switch(name) {
+      case "discord_optimal": return "Discord";
+      case "split_sni_compatible": return "Split SNI";
+      case "fake_badsum_autottl": return "Badsum";
+      case "multisplit_midsni": return "Multisplit";
+      case "disorder_sni": return "Disorder";
+      default: return "Preset";
+    }
+  }
+
+  function renderCustomProfiles() {
+    var container = document.getElementById("customProfilesList");
+    if (!container) return;
+
+    while (container.firstChild) {
+      container.removeChild(container.firstChild);
+    }
+
+    if (!state.customProfiles || state.customProfiles.length === 0) {
+      var emptyBox = document.createElement("div");
+      emptyBox.className = "empty-custom-box";
+
+      var p = document.createElement("p");
+      p.textContent = "No custom profiles created yet. You can create one by pasting your own nfqws command or arguments.";
+      emptyBox.appendChild(p);
+
+      var btnAdd = document.createElement("button");
+      btnAdd.className = "btn-sm";
+      btnAdd.style.background = "var(--accent)";
+      btnAdd.style.color = "#fff";
+      btnAdd.textContent = "📋 Create Profile from Clipboard";
+      btnAdd.onclick = function() {
+        openCustomProfileEditor();
+      };
+      emptyBox.appendChild(btnAdd);
+      container.appendChild(emptyBox);
+      return;
+    }
+
+    state.customProfiles.forEach(function(prof, index) {
+      var isCurrentActive = (state.config.DPI_MODE === "custom" && state.config.CUSTOM_PROFILE_NAME === prof.name);
+
+      var card = document.createElement("div");
+      card.className = "preset-card custom-preset-card" + (isCurrentActive ? " active-preset" : "");
+      card.setAttribute("data-custom-id", prof.id || String(index));
+
+      var header = document.createElement("div");
+      header.className = "preset-header";
+
+      var title = document.createElement("div");
+      title.className = "preset-title";
+      title.textContent = "⭐ " + prof.name;
+      header.appendChild(title);
+
+      var toolbar = document.createElement("div");
+      toolbar.style.display = "flex";
+      toolbar.style.alignItems = "center";
+      toolbar.style.gap = "4px";
+
+      var badge = document.createElement("span");
+      badge.className = "preset-badge";
+      if (isCurrentActive) {
+        badge.style.background = "var(--good-soft)";
+        badge.style.color = "var(--good)";
+        badge.textContent = "Active";
+      } else {
+        badge.style.background = "var(--accent-soft)";
+        badge.style.color = "var(--accent)";
+        badge.textContent = "Custom";
+      }
+      toolbar.appendChild(badge);
+
+      var btnRename = document.createElement("button");
+      btnRename.className = "btn-icon";
+      btnRename.title = "Rename Profile";
+      btnRename.textContent = "✏️";
+      btnRename.onclick = function(e) {
+        e.stopPropagation();
+        var newName = prompt("Enter new profile name:", prof.name);
+        if (newName && newName.trim() && newName.trim() !== prof.name) {
+          prof.name = newName.trim();
+          saveCustomProfilesList();
+        }
+      };
+      toolbar.appendChild(btnRename);
+
+      var btnEdit = document.createElement("button");
+      btnEdit.className = "btn-icon";
+      btnEdit.title = "Edit Arguments / Paste";
+      btnEdit.textContent = "📋";
+      btnEdit.onclick = function(e) {
+        e.stopPropagation();
+        openCustomProfileEditor(prof);
+      };
+      toolbar.appendChild(btnEdit);
+
+      var btnDel = document.createElement("button");
+      btnDel.className = "btn-icon";
+      btnDel.title = "Delete Profile";
+      btnDel.textContent = "🗑️";
+      btnDel.onclick = function(e) {
+        e.stopPropagation();
+        if (confirm('Are you sure you want to delete profile "' + prof.name + '"?')) {
+          state.customProfiles.splice(index, 1);
+          saveCustomProfilesList();
+        }
+      };
+      toolbar.appendChild(btnDel);
+
+      header.appendChild(toolbar);
+      card.appendChild(header);
+
+      var desc = document.createElement("div");
+      desc.className = "preset-desc";
+      desc.style.fontFamily = "monospace";
+      desc.style.fontSize = "11.5px";
+      desc.style.background = "var(--field)";
+      desc.style.padding = "8px 10px";
+      desc.style.borderRadius = "8px";
+      desc.style.wordBreak = "break-all";
+      desc.style.margin = "8px 0 10px";
+      desc.textContent = prof.args;
+      card.appendChild(desc);
+
+      var btnApply = document.createElement("button");
+      btnApply.className = "btn-sm";
+      btnApply.style.width = "100%";
+      btnApply.style.justifyContent = "center";
+      btnApply.style.background = isCurrentActive ? "var(--good)" : "var(--field)";
+      btnApply.style.color = isCurrentActive ? "#fff" : "var(--ink)";
+      btnApply.style.padding = "8px 0";
+      btnApply.style.borderRadius = "10px";
+      btnApply.textContent = isCurrentActive ? "✓ Currently Active" : "⚡ Select & Apply Profile";
+      btnApply.onclick = function(e) {
+        e.stopPropagation();
+        applyCustomProfile(prof);
+      };
+      card.appendChild(btnApply);
+
+      card.onclick = function() {
+        applyCustomProfile(prof);
+      };
+
+      container.appendChild(card);
+    });
+  }
+
+  function openCustomProfileEditor(profile) {
+    var editor = document.getElementById("customProfileEditor");
+    var titleEl = document.getElementById("editorTitle");
+    var nameInp = document.getElementById("customProfName");
+    var argsInp = document.getElementById("customProfArgs");
+
+    if (profile) {
+      state.editingProfileId = profile.id;
+      titleEl.textContent = "Edit Custom Profile";
+      nameInp.value = profile.name || "";
+      argsInp.value = profile.args || "";
+    } else {
+      state.editingProfileId = null;
+      titleEl.textContent = "New Custom Profile";
+      nameInp.value = "Custom Profile " + (state.customProfiles.length + 1);
+      argsInp.value = "";
+    }
+    editor.style.display = "block";
+    nameInp.focus();
+  }
+
+  function closeCustomProfileEditor() {
+    var editor = document.getElementById("customProfileEditor");
+    editor.style.display = "none";
+    state.editingProfileId = null;
+  }
+
+  function saveCustomProfilesList() {
+    var jsonStr = JSON.stringify(state.customProfiles);
+    ksuExec(SCRIPT + " save-custom-profiles " + JSON.stringify(jsonStr)).then(function() {
+      toast("Custom profiles updated! 🟢");
+      loadData();
+    });
+  }
+
+  function applyCustomProfile(prof) {
+    toast("Applying custom profile: " + prof.name);
+    var cmd = [
+      SCRIPT,
+      "set-custom-profile",
+      JSON.stringify(prof.name),
+      prof.args
+    ].join(" ");
+
+    ksuExec(cmd).then(function() {
+      toast("Custom profile activated! 🟢");
+      loadData();
+    });
+  }
+
   function renderList() {
     var container = document.getElementById("appList");
     var filter = state.filterText.toLowerCase().trim();
     var tab = state.activeTab;
 
     var filtered = state.apps.filter(function(app) {
-      // Tab filtre
       if (tab === "user" && !app.user && !state.selected.has(app.pkg)) return false;
       if (tab === "selected" && !state.selected.has(app.pkg)) return false;
-
-      // Text filtre
       if (!filter) return true;
-      return app.label.toLowerCase().indexOf(filter) !== -1 ||
-             app.pkg.toLowerCase().indexOf(filter) !== -1 ||
+      return app.pkg.toLowerCase().indexOf(filter) !== -1 ||
+             app.label.toLowerCase().indexOf(filter) !== -1 ||
              String(app.uid).indexOf(filter) !== -1;
     });
 
@@ -772,21 +1805,7 @@ input:checked + .slider:before {
     if (filtered.length === 0) {
       var emptyDiv = document.createElement("div");
       emptyDiv.className = "empty-msg";
-      emptyDiv.textContent = "Eşleşen uygulama bulunamadı.";
-      if (filter.indexOf(".") !== -1) {
-        var addBtn = document.createElement("button");
-        addBtn.className = "btn-secondary";
-        addBtn.style.marginTop = "12px";
-        addBtn.textContent = "+ " + filter + " paketini ekle";
-        addBtn.onclick = function() {
-          setPkg(filter, true);
-          document.getElementById("searchInput").value = "";
-          state.filterText = "";
-          renderUI();
-        };
-        emptyDiv.appendChild(document.createElement("br"));
-        emptyDiv.appendChild(addBtn);
-      }
+      emptyDiv.textContent = filter ? "No matching applications found." : "Application list is empty.";
       container.appendChild(emptyDiv);
       return;
     }
@@ -857,10 +1876,6 @@ input:checked + .slider:before {
     });
   }
 
-  function escapeHtml(str) {
-    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  }
-
   function togglePkg(pkg) {
     if (state.selected.has(pkg)) state.selected.delete(pkg);
     else state.selected.add(pkg);
@@ -873,75 +1888,547 @@ input:checked + .slider:before {
     renderUI();
   }
 
-  // Presets click
-  document.querySelectorAll("#presetsBar .chip").forEach(function(chip) {
-    chip.addEventListener("click", function() {
-      var pkg = chip.getAttribute("data-pkg");
-      togglePkg(pkg);
-    });
-  });
+  function syncManualFormWithState() {
+    var c = state.config;
+    document.getElementById("manualModeToggle").checked = (c.DPI_MODE === "manual");
+    document.getElementById("cfgTcpDesync").value = c.TCP_DESYNC || "fake";
+    document.getElementById("cfgSplitPos").value = c.TCP_SPLIT_POS || "sni";
+    document.getElementById("cfgFooling").value = c.TCP_FOOLING || "md5sig";
+    document.getElementById("cfgTtlMode").value = c.TCP_TTL_MODE || "none";
+    document.getElementById("cfgTtlVal").value = c.TCP_TTL_VALUE || "8";
+    document.getElementById("cfgTcpPorts").value = c.TCP_PORTS || "80,443,2053,2083,2087,2096,8443";
+    document.getElementById("cfgUdpDesync").value = c.UDP_DESYNC || "fake";
+    document.getElementById("cfgUdpRepeats").value = c.UDP_REPEATS || "2";
+    document.getElementById("cfgExtraArgs").value = c.CUSTOM_EXTRA_ARGS || "";
 
-  // Tab switching
-  document.querySelectorAll(".tab").forEach(function(tabEl) {
-    tabEl.addEventListener("click", function() {
-      document.querySelectorAll(".tab").forEach(function(t) { t.classList.remove("active"); });
-      tabEl.classList.add("active");
-      state.activeTab = tabEl.getAttribute("data-tab");
+    updateManualFormVisibility();
+    updateCliPreview();
+  }
+
+  function updateManualFormVisibility() {
+    var desync = document.getElementById("cfgTcpDesync").value;
+    var ttlMode = document.getElementById("cfgTtlMode").value;
+    var udpDesync = document.getElementById("cfgUdpDesync").value;
+
+    document.getElementById("groupSplitPos").style.display = (desync === "split" || desync === "disorder" || desync === "multisplit") ? "block" : "none";
+    document.getElementById("groupFooling").style.display = (desync === "fake") ? "block" : "none";
+    document.getElementById("groupTtlVal").style.display = (ttlMode === "custom") ? "block" : "none";
+    document.getElementById("groupUdpRepeats").style.display = (udpDesync !== "none") ? "block" : "none";
+  }
+
+  function updateCliPreview() {
+    var isManual = document.getElementById("manualModeToggle").checked;
+    var previewEl = document.getElementById("cliPreview");
+    if (!previewEl) return;
+
+    var cmd = "nfqws --daemon --uid=0:0,3003 --qnum=200";
+
+    if (!isManual) {
+      if (state.config.DPI_MODE === "custom") {
+        cmd += " " + (state.config.CUSTOM_PROFILE_ARGS || "");
+      } else {
+        var p = state.config.PRESET_NAME || "discord_optimal";
+        switch(p) {
+          case "discord_optimal":
+            cmd += " --filter-tcp=80,443,2053,2083,2087,2096,8443 --dpi-desync=fake --dpi-desync-fooling=md5sig --new --filter-udp=50000-65535,19294-19344 --filter-l7=discord --dpi-desync=fake --dpi-desync-repeats=2";
+            break;
+          case "split_sni_compatible":
+            cmd += " --filter-tcp=80,443,2053,2083,2087,2096,8443 --dpi-desync=split --dpi-desync-split-pos=sni --new --filter-udp=50000-65535,19294-19344 --filter-l7=discord --dpi-desync=fake --dpi-desync-repeats=2";
+            break;
+          case "fake_badsum_autottl":
+            cmd += " --filter-tcp=80,443,2053,2083,2087,2096,8443 --dpi-desync=fake --dpi-desync-fooling=badsum --dpi-desync-autottl=-1 --new --filter-udp=50000-65535,19294-19344 --filter-l7=discord --dpi-desync=fake --dpi-desync-repeats=2";
+            break;
+          case "multisplit_midsni":
+            cmd += " --filter-tcp=80,443,2053,2083,2087,2096,8443 --dpi-desync=multisplit --dpi-desync-split-pos=2,midsni --new --filter-udp=50000-65535,19294-19344 --filter-l7=discord --dpi-desync=fake --dpi-desync-repeats=2";
+            break;
+          case "disorder_sni":
+            cmd += " --filter-tcp=80,443,2053,2083,2087,2096,8443 --dpi-desync=disorder --dpi-desync-split-pos=sni --new --filter-udp=50000-65535,19294-19344 --filter-l7=discord --dpi-desync=fake --dpi-desync-repeats=2";
+            break;
+        }
+      }
+    } else {
+      var tcpDesync = document.getElementById("cfgTcpDesync").value;
+      var splitPos = document.getElementById("cfgSplitPos").value;
+      var fooling = document.getElementById("cfgFooling").value;
+      var ttlMode = document.getElementById("cfgTtlMode").value;
+      var ttlVal = document.getElementById("cfgTtlVal").value;
+      var tcpPorts = document.getElementById("cfgTcpPorts").value || "80,443";
+      var udpDesync = document.getElementById("cfgUdpDesync").value;
+      var udpRepeats = document.getElementById("cfgUdpRepeats").value;
+      var extra = document.getElementById("cfgExtraArgs").value;
+
+      cmd += " --filter-tcp=" + tcpPorts + " --dpi-desync=" + tcpDesync;
+      if (tcpDesync === "split" || tcpDesync === "disorder" || tcpDesync === "multisplit") {
+        cmd += " --dpi-desync-split-pos=" + splitPos;
+      } else if (tcpDesync === "fake" && fooling !== "none") {
+        cmd += " --dpi-desync-fooling=" + fooling;
+      }
+
+      if (ttlMode === "auto") cmd += " --dpi-desync-autottl=-1";
+      else if (ttlMode === "custom" && ttlVal) cmd += " --dpi-desync-ttl=" + ttlVal;
+
+      if (udpDesync !== "none") {
+        cmd += " --new --filter-udp=50000-65535,19294-19344 --filter-l7=discord --dpi-desync=" + udpDesync + " --dpi-desync-repeats=" + udpRepeats;
+      }
+      if (extra.trim()) {
+        cmd += " " + extra.trim();
+      }
+    }
+
+    previewEl.textContent = cmd;
+  }
+
+  // Event Listeners
+  document.addEventListener("DOMContentLoaded", function() {
+    loadData();
+
+    // Navigation Switch
+    var navBtns = document.querySelectorAll(".nav-btn");
+    navBtns.forEach(function(btn) {
+      btn.addEventListener("click", function() {
+        var view = btn.getAttribute("data-view");
+        state.activeView = view;
+        navBtns.forEach(function(b) { b.classList.remove("active"); });
+        btn.classList.add("active");
+
+        document.querySelectorAll(".view-panel").forEach(function(p) { p.classList.remove("active"); });
+        var targetPanel = document.getElementById("view" + view.charAt(0).toUpperCase() + view.slice(1));
+        if (targetPanel) targetPanel.classList.add("active");
+
+        var bottomBar = document.getElementById("stickyBottomBar");
+        if (bottomBar) {
+          bottomBar.style.display = (view === "apps") ? "flex" : "none";
+        }
+      });
+    });
+
+    // Power Toggle
+    document.getElementById("powerToggle").addEventListener("change", function(e) {
+      var act = e.target.checked ? "start" : "stop";
+      toast(act === "start" ? "Starting module..." : "Stopping module...");
+      ksuExec(SCRIPT + " " + act).then(function() {
+        setTimeout(loadData, 600);
+      });
+    });
+
+    // App Search
+    document.getElementById("searchInput").addEventListener("input", function(e) {
+      state.filterText = e.target.value;
       renderList();
     });
-  });
 
-  // Search input
-  document.getElementById("searchInput").addEventListener("input", function(e) {
-    state.filterText = e.target.value;
-    renderList();
-  });
-
-  // Power Toggle
-  document.getElementById("powerToggle").addEventListener("change", function(e) {
-    var wanted = e.target.checked;
-    toast(wanted ? "Bypass başlatılıyor..." : "Bypass durduruluyor...");
-    ksuExec(SCRIPT + " toggle").then(function(res) {
-      loadData().then(function() {
-        toast(state.active ? "DPI Bypass aktif 🟢" : "DPI Bypass durduruldu 🔴");
+    // App Tabs
+    document.querySelectorAll(".tabs .tab").forEach(function(tab) {
+      tab.addEventListener("click", function() {
+        document.querySelectorAll(".tabs .tab").forEach(function(t) { t.classList.remove("active"); });
+        tab.classList.add("active");
+        state.activeTab = tab.getAttribute("data-tab");
+        renderList();
       });
     });
-  });
 
-  // Save Button
-  document.getElementById("btnSave").addEventListener("click", function() {
-    var btn = document.getElementById("btnSave");
-    btn.disabled = true;
-    toast("Kaydediliyor ve kurallar güncelleniyor...");
-
-    var pkgs = [];
-    state.selected.forEach(function(pkg) { pkgs.push(pkg); });
-    var cmd = SCRIPT + " save-apps " + pkgs.join(" ");
-
-    ksuExec(cmd).then(function(res) {
-      btn.disabled = false;
-      loadData().then(function() {
-        toast("Başarıyla kaydedildi ve uygulandı! 🟢", 2500);
+    // Popular Apps Chips
+    document.querySelectorAll("#presetsBar .chip").forEach(function(chip) {
+      chip.addEventListener("click", function() {
+        var pkg = chip.getAttribute("data-pkg");
+        togglePkg(pkg);
       });
     });
-  });
 
-  // İlk yükleme
-  loadData();
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", loadData);
-  }
-
-  var statusPill = document.getElementById("statusPill");
-  if (statusPill) {
-    statusPill.style.cursor = "pointer";
-    statusPill.title = "Yenilemek için dokunun";
-    statusPill.addEventListener("click", function() {
-      toast("Yenileniyor...");
-      loadData();
+    // Save Apps Button
+    document.getElementById("btnSave").addEventListener("click", function() {
+      var btn = document.getElementById("btnSave");
+      btn.disabled = true;
+      var arr = [];
+      state.selected.forEach(function(p) { arr.push(p); });
+      var cmd = SCRIPT + " save-apps " + arr.join(" ");
+      toast("Applying application settings...");
+      ksuExec(cmd).then(function() {
+        btn.disabled = false;
+        toast("Application list updated! 🟢");
+        loadData();
+      });
     });
-  }
 
+    // Preset Cards Click (Built-in)
+    document.querySelectorAll(".preset-card:not(.custom-preset-card)").forEach(function(card) {
+      card.addEventListener("click", function() {
+        var pname = card.getAttribute("data-preset");
+        toast("Preset selected: " + cleanPresetLabel(pname));
+        ksuExec(SCRIPT + " set-preset " + pname).then(function() {
+          toast("Preset applied successfully! 🟢");
+          loadData();
+        });
+      });
+    });
+
+    // New Custom Profile Button
+    document.getElementById("btnNewCustomProfile").addEventListener("click", function() {
+      openCustomProfileEditor();
+    });
+
+    document.getElementById("btnCloseEditor").addEventListener("click", closeCustomProfileEditor);
+    document.getElementById("btnCancelEditor").addEventListener("click", closeCustomProfileEditor);
+
+    // Paste in Custom Profile Editor
+    document.getElementById("btnPasteEditorArgs").addEventListener("click", function() {
+      getClipboardText().then(function(text) {
+        if (!text) return;
+        var cleaned = cleanNfqwsCommand(text);
+        document.getElementById("customProfArgs").value = cleaned;
+        toast("Arguments pasted from clipboard! 📋");
+      });
+    });
+
+    // Save Custom Profile Button
+    document.getElementById("btnSaveCustomProf").addEventListener("click", function() {
+      var name = document.getElementById("customProfName").value.trim();
+      var rawArgs = document.getElementById("customProfArgs").value.trim();
+      var cleanedArgs = cleanNfqwsCommand(rawArgs);
+
+      if (!name) {
+        toast("Please enter a profile name!");
+        return;
+      }
+      if (!cleanedArgs) {
+        toast("Please enter valid nfqws arguments!");
+        return;
+      }
+
+      if (state.editingProfileId) {
+        // Edit existing
+        for (var i = 0; i < state.customProfiles.length; i++) {
+          if (state.customProfiles[i].id === state.editingProfileId) {
+            state.customProfiles[i].name = name;
+            state.customProfiles[i].args = cleanedArgs;
+            break;
+          }
+        }
+      } else {
+        // New profile
+        var newProf = {
+          id: "custom_" + Date.now(),
+          name: name,
+          args: cleanedArgs
+        };
+        state.customProfiles.push(newProf);
+      }
+
+      closeCustomProfileEditor();
+
+      // Save custom profiles list & apply this profile immediately
+      var jsonStr = JSON.stringify(state.customProfiles);
+      ksuExec(SCRIPT + " save-custom-profiles " + JSON.stringify(jsonStr)).then(function() {
+        var applyCmd = [
+          SCRIPT,
+          "set-custom-profile",
+          JSON.stringify(name),
+          cleanedArgs
+        ].join(" ");
+        ksuExec(applyCmd).then(function() {
+          toast('Profile "' + name + '" saved & applied! 🟢');
+          loadData();
+        });
+      });
+    });
+
+    // Paste Button on Live Command (CLI Preview)
+    document.getElementById("btnPasteCli").addEventListener("click", function() {
+      getClipboardText().then(function(text) {
+        if (!text) return;
+        var cleaned = cleanNfqwsCommand(text);
+        if (!cleaned) {
+          toast("No valid command found in clipboard!");
+          return;
+        }
+        document.getElementById("manualModeToggle").checked = true;
+        document.getElementById("cfgExtraArgs").value = cleaned;
+        updateCliPreview();
+        toast("Command pasted to manual parameters! 📋");
+      });
+    });
+
+    // Copy Button on Live Command (CLI Preview)
+    document.getElementById("btnCopyCli").addEventListener("click", function() {
+      var cmd = document.getElementById("cliPreview").textContent;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(cmd).then(function() {
+          toast("Command copied to clipboard! 📄");
+        }).catch(function() {
+          prompt("Copy the command:", cmd);
+        });
+      } else {
+        prompt("Copy the command:", cmd);
+      }
+    });
+
+    // Auto-Tune Start Button
+    var winnerPresetName = "";
+    document.getElementById("btnStartAutoTune").addEventListener("click", function() {
+      var domain = document.getElementById("autoTuneDomain").value.trim() || "discord.com";
+      var btn = document.getElementById("btnStartAutoTune");
+      btn.disabled = true;
+      btn.style.opacity = "0.6";
+
+      document.querySelectorAll("#autoTuneList .strategy-row").forEach(function(row) {
+        var stat = row.querySelector(".strategy-status");
+        stat.className = "strategy-status testing";
+        stat.textContent = "Testing...";
+      });
+      document.getElementById("winnerBanner").style.display = "none";
+      toast("Benchmarking DPI strategies...");
+
+      ksuExec(SCRIPT + " autotune " + domain).then(function(res) {
+        btn.disabled = false;
+        btn.style.opacity = "1";
+        var out = res.stdout || "";
+        var lines = out.split("\n");
+
+        lines.forEach(function(l) {
+          l = l.trim();
+          if (l.startsWith("RESULT|")) {
+            var parts = l.split("|");
+            var sName = parts[1];
+            var sStatus = parts[2];
+            var sCode = parts[3];
+            var sTime = parts[4];
+            var row = document.querySelector('.strategy-row[data-strat="' + sName + '"]');
+            if (row) {
+              var stat = row.querySelector(".strategy-status");
+              if (sStatus === "SUCCESS") {
+                stat.className = "strategy-status success";
+                stat.textContent = "🟢 " + sCode + " (" + sTime + ")";
+              } else {
+                stat.className = "strategy-status failed";
+                stat.textContent = "🔴 Failed";
+              }
+            }
+          } else if (l.startsWith("WINNER|")) {
+            var wParts = l.split("|");
+            var wName = wParts[1];
+            var wTime = wParts[2];
+            if (wName && wName !== "NONE") {
+              winnerPresetName = wName;
+              var banner = document.getElementById("winnerBanner");
+              banner.style.display = "block";
+              document.getElementById("winnerTitle").textContent = "🏆 Optimal Strategy: " + cleanPresetLabel(wName);
+              document.getElementById("winnerDesc").textContent = domain + " connection verified in " + wTime + ". This strategy successfully bypasses ISP filtering.";
+            } else {
+              toast("No strategy succeeded! Check target domain or network.", 3500);
+            }
+          }
+        });
+      });
+    });
+
+    // Apply Winner Button
+    document.getElementById("btnApplyWinner").addEventListener("click", function() {
+      if (!winnerPresetName) return;
+      toast("Applying winning strategy...");
+      ksuExec(SCRIPT + " set-preset " + winnerPresetName).then(function() {
+        toast("Strategy saved and applied! 🟢");
+        loadData();
+      });
+    });
+
+    // Manual Form Listeners
+    ["cfgTcpDesync", "cfgSplitPos", "cfgFooling", "cfgTtlMode", "cfgTtlVal", "cfgTcpPorts", "cfgUdpDesync", "cfgUdpRepeats", "cfgExtraArgs", "manualModeToggle"].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) {
+        el.addEventListener("input", function() {
+          updateManualFormVisibility();
+          updateCliPreview();
+        });
+        el.addEventListener("change", function() {
+          updateManualFormVisibility();
+          updateCliPreview();
+        });
+      }
+    });
+
+    // Save Manual Button
+    document.getElementById("btnSaveManual").addEventListener("click", function() {
+      var isManual = document.getElementById("manualModeToggle").checked;
+      var mode = isManual ? "manual" : "preset";
+      var preset = state.config.PRESET_NAME || "discord_optimal";
+      var tcpDesync = document.getElementById("cfgTcpDesync").value;
+      var splitPos = document.getElementById("cfgSplitPos").value;
+      var fooling = document.getElementById("cfgFooling").value;
+      var ttlMode = document.getElementById("cfgTtlMode").value;
+      var ttlVal = document.getElementById("cfgTtlVal").value || "8";
+      var tcpPorts = document.getElementById("cfgTcpPorts").value || "80,443,2053,2083,2087,2096,8443";
+      var udpDesync = document.getElementById("cfgUdpDesync").value;
+      var udpRepeats = document.getElementById("cfgUdpRepeats").value || "2";
+      var udpPorts = "50000-65535,19294-19344";
+      var udpL7 = "discord";
+      var extra = document.getElementById("cfgExtraArgs").value;
+      var autoDom = document.getElementById("autoTuneDomain").value.trim() || "discord.com";
+      var customName = state.config.CUSTOM_PROFILE_NAME || "";
+      var customArgs = state.config.CUSTOM_PROFILE_ARGS || "";
+
+      var cmd = [
+        SCRIPT,
+        "save-config",
+        JSON.stringify(mode),
+        JSON.stringify(preset),
+        JSON.stringify(tcpDesync),
+        JSON.stringify(splitPos),
+        JSON.stringify(fooling),
+        JSON.stringify(ttlMode),
+        JSON.stringify(ttlVal),
+        JSON.stringify(tcpPorts),
+        JSON.stringify(udpDesync),
+        JSON.stringify(udpRepeats),
+        JSON.stringify(udpPorts),
+        JSON.stringify(udpL7),
+        JSON.stringify(extra),
+        JSON.stringify(autoDom),
+        JSON.stringify(customName),
+        JSON.stringify(customArgs),
+        JSON.stringify(state.dns.enabled || "1"),
+        JSON.stringify(state.dns.preset || "cloudflare"),
+        JSON.stringify(state.dns.upstream || "https://1.1.1.1/dns-query")
+      ].join(" ");
+
+      toast("Saving manual configuration...");
+      ksuExec(cmd).then(function() {
+        toast("Manual settings applied successfully! 🟢");
+        loadData();
+      });
+    });
+
+    // DNS Provider Dropdown Change
+    var dSelect = document.getElementById("dnsProviderSelect");
+    var dInput = document.getElementById("dnsUpstreamInput");
+    if (dSelect && dInput) {
+      dSelect.addEventListener("change", function() {
+        if (dSelect.value !== "custom") {
+          dInput.value = dSelect.value;
+        }
+      });
+
+      dInput.addEventListener("input", function() {
+        var found = false;
+        for (var i = 0; i < dSelect.options.length; i++) {
+          if (dSelect.options[i].value === dInput.value) {
+            dSelect.selectedIndex = i;
+            found = true;
+            break;
+          }
+        }
+        if (!found) dSelect.value = "custom";
+      });
+    }
+
+    // Paste DNS URL Button
+    var btnPasteDns = document.getElementById("btnPasteDnsUrl");
+    if (btnPasteDns && dInput) {
+      btnPasteDns.addEventListener("click", function() {
+        readFromClipboard().then(function(text) {
+          if (text && text.trim().startsWith("http")) {
+            dInput.value = text.trim();
+            dInput.dispatchEvent(new Event("input"));
+            toast("DoH URL pasted!");
+          } else {
+            toast("Clipboard does not contain a valid URL", 3000);
+          }
+        });
+      });
+    }
+
+    // Save DNS Button
+    var btnSaveDns = document.getElementById("btnSaveDns");
+    if (btnSaveDns) {
+      btnSaveDns.addEventListener("click", function() {
+        var enabled = document.getElementById("dnsEnableToggle").checked ? "1" : "0";
+        var upstream = (dInput ? dInput.value : "").trim() || "https://1.1.1.1/dns-query";
+        var opt = dSelect ? dSelect.options[dSelect.selectedIndex] : null;
+        var preset = opt ? (opt.getAttribute("data-preset") || "custom") : "custom";
+
+        toast("Applying DNS configuration...");
+        var cmd = [
+          SCRIPT,
+          "set-dns",
+          JSON.stringify(enabled),
+          JSON.stringify(upstream),
+          JSON.stringify(preset)
+        ].join(" ");
+
+        ksuExec(cmd).then(function() {
+          toast("DNS settings applied successfully! 🟢");
+          loadData();
+        });
+      });
+    }
+
+    // DNS Enable Toggle
+    var dnsToggle = document.getElementById("dnsEnableToggle");
+    if (dnsToggle) {
+      dnsToggle.addEventListener("change", function(e) {
+        var enabled = e.target.checked ? "1" : "0";
+        var upstream = (dInput ? dInput.value : "").trim() || "https://1.1.1.1/dns-query";
+        var opt = dSelect ? dSelect.options[dSelect.selectedIndex] : null;
+        var preset = opt ? (opt.getAttribute("data-preset") || "custom") : "custom";
+        var cmd = [
+          SCRIPT,
+          "set-dns",
+          JSON.stringify(enabled),
+          JSON.stringify(upstream),
+          JSON.stringify(preset)
+        ].join(" ");
+
+        ksuExec(cmd).then(function() {
+          toast(enabled === "1" ? "DoH Bypass Enabled 🟢" : "DoH Bypass Disabled ⚪");
+          loadData();
+        });
+      });
+    }
+
+    // Run DNS Test Button
+    var btnRunDns = document.getElementById("btnRunDnsTest");
+    if (btnRunDns) {
+      btnRunDns.addEventListener("click", function() {
+        var domInput = document.getElementById("dnsTestDomain");
+        var dom = (domInput ? domInput.value : "").trim() || "discord.com";
+        var resBox = document.getElementById("dnsTestResultBox");
+        var badge = document.getElementById("dnsTestStatusBadge");
+        var lat = document.getElementById("dnsTestLatency");
+        var ips = document.getElementById("dnsTestIps");
+
+        toast("Resolving " + dom + " via DoH...");
+        ksuExec(SCRIPT + " test-dns " + JSON.stringify(dom)).then(function(res) {
+          var out = (res.stdout || "").trim();
+          resBox.style.display = "block";
+          var parts = out.split("|");
+          if (parts[0] === "SUCCESS") {
+            badge.textContent = "SUCCESS";
+            badge.style.background = "var(--green)";
+            badge.style.color = "#fff";
+            lat.textContent = parts[3] || "";
+            ips.textContent = parts[2] || "Resolved";
+          } else {
+            badge.textContent = "FAILED";
+            badge.style.background = "#ed4245";
+            badge.style.color = "#fff";
+            lat.textContent = parts[3] || "";
+            ips.textContent = parts[2] || "Resolution failed";
+          }
+        });
+      });
+    }
+
+    // Status pill refresh
+    var statusPill = document.getElementById("statusPill");
+    if (statusPill) {
+      statusPill.style.cursor = "pointer";
+      statusPill.title = "Tap to refresh";
+      statusPill.addEventListener("click", function() {
+        toast("Refreshing...");
+        loadData();
+      });
+    }
+
+  });
 })();
 </script>
 </body>
