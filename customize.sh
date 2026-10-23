@@ -6,11 +6,11 @@ ui_print "****************************************"
 # Kalıcı veri dizini oluştur ve varsayılan listeyi kopyala
 mkdir -p /data/adb/app-dpi-bypass
 if [ ! -f /data/adb/app-dpi-bypass/apps.list ]; then
-    ui_print "- Varsayılan apps.list oluşturuluyor..."
+    ui_print "- Creating default apps.list..."
     cp "$MODPATH/apps.list" /data/adb/app-dpi-bypass/apps.list
 fi
 if [ ! -f /data/adb/app-dpi-bypass/config.conf ]; then
-    ui_print "- Varsayılan config.conf oluşturuluyor..."
+    ui_print "- Creating default config.conf..."
     cp "$MODPATH/config.conf" /data/adb/app-dpi-bypass/config.conf
 else
     # Mevcut config varsa eksik DNS parametrelerini ekle
@@ -26,7 +26,7 @@ if [ ! -f /data/adb/app-dpi-bypass/custom_profiles.json ]; then
     echo "[]" > /data/adb/app-dpi-bypass/custom_profiles.json
 fi
 
-ui_print "- Dosya izinleri ayarlanıyor..."
+ui_print "- Setting file permissions..."
 set_perm_recursive "$MODPATH" 0 0 0755 0644
 set_perm "$MODPATH/dpi_ctl.sh" 0 0 0755
 set_perm "$MODPATH/action.sh" 0 0 0755
@@ -40,10 +40,10 @@ set_perm_recursive "$MODPATH/webroot" 0 0 0755 0644
 
 # Eski discord-dpi-bypass kalıntısı varsa temizle
 if [ -d "/data/adb/modules/discord-dpi-bypass" ] && [ "$MODPATH" != "/data/adb/modules/discord-dpi-bypass" ]; then
-    ui_print "- Eski discord-dpi-bypass modülü temizleniyor..."
+    ui_print "- Cleaning up legacy discord-dpi-bypass module..."
     sh /data/adb/modules/discord-dpi-bypass/dpi_ctl.sh stop 2>/dev/null
     rm -rf /data/adb/modules/discord-dpi-bypass
 fi
 
-ui_print "- Kurulum tamamlandı!"
-ui_print "- KernelSU Manager içindeki WebUI ikonundan uygulamaları seçebilirsiniz."
+ui_print "- Installation complete!"
+ui_print "- Open WebUI from KernelSU/APatch Manager to select apps."

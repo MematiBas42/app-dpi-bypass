@@ -542,9 +542,15 @@ input:checked + .slider:before {
   display: flex;
   align-items: center;
   gap: 6px;
-  transition: opacity .2s;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.15s ease, opacity 0.15s ease, box-shadow 0.15s ease;
 }
-.btn-primary:active { opacity: 0.8; }
+.btn-primary:active:not(:disabled) {
+  transform: scale(0.96);
+  opacity: 0.9;
+}
 .btn-secondary {
   background: var(--field);
   color: var(--ink);
@@ -554,7 +560,106 @@ input:checked + .slider:before {
   font-size: 13.5px;
   font-weight: 700;
   cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.15s ease, opacity 0.15s ease;
 }
+.btn-secondary:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+/* Tactile Click & Active Transitions */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+button, .btn-save, .btn-sm, .nav-btn, .chip, .tab, .preset-card {
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.15s ease, opacity 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+button:active:not(:disabled),
+.btn-save:active:not(:disabled),
+.btn-sm:active:not(:disabled),
+.nav-btn:active,
+.chip:active,
+.tab:active,
+.preset-card:active {
+  transform: scale(0.96) !important;
+}
+.btn-icon:active {
+  transform: scale(1.15) !important;
+}
+.app-item {
+  transition: background-color 0.15s ease, transform 0.12s ease;
+}
+.app-item:active {
+  background: var(--card-press) !important;
+  transform: scale(0.985);
+}
+
+/* Button Loading State & Spinner */
+@keyframes btnSpinner {
+  to { transform: rotate(360deg); }
+}
+.btn-loading {
+  position: relative !important;
+  pointer-events: none !important;
+  cursor: default !important;
+}
+.btn-loading .btn-content {
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+.btn-loading::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 18px;
+  height: 18px;
+  margin-top: -9px;
+  margin-left: -9px;
+  border: 2.5px solid rgba(255, 255, 255, 0.32);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: btnSpinner 0.65s linear infinite;
+  z-index: 10;
+  box-sizing: border-box;
+}
+.btn-secondary.btn-loading::after {
+  border: 2.5px solid rgba(255, 255, 255, 0.15);
+  border-top-color: var(--accent);
+}
+.btn-sm.btn-loading::after {
+  width: 14px;
+  height: 14px;
+  margin-top: -7px;
+  margin-left: -7px;
+  border-width: 2px;
+}
+
+/* Auto-Tune Benchmark Button Progress Bar */
+.btn-progress-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 0%;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.45));
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.35);
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Live Testing Pulse Animation */
+@keyframes pulseStatus {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.96); }
+}
+
 .strategy-row {
   display: flex;
   align-items: center;
@@ -574,7 +679,10 @@ input:checked + .slider:before {
 }
 .strategy-status.success { color: var(--good); }
 .strategy-status.failed { color: var(--danger); }
-.strategy-status.testing { color: var(--warn); }
+.strategy-status.testing {
+  color: var(--warn);
+  animation: pulseStatus 1s ease-in-out infinite;
+}
 .strategy-status.waiting { color: var(--faint); }
 
 .winner-banner {
@@ -839,7 +947,9 @@ input:checked + .slider:before {
         </span>
       </div>
       <div style="display: flex; gap: 8px; margin-top: 12px;">
-        <button id="btnSaveCustomProf" class="btn-primary" style="flex: 1; justify-content: center;">Save &amp; Apply</button>
+        <button id="btnSaveCustomProf" class="btn-primary" style="flex: 1; justify-content: center;">
+          <span class="btn-content">Save &amp; Apply</span>
+        </button>
         <button id="btnCancelEditor" class="btn-secondary" style="flex: 0 0 auto;">Cancel</button>
       </div>
     </div>
@@ -929,11 +1039,14 @@ input:checked + .slider:before {
 
       <div class="autotune-input-row">
         <input type="text" id="autoTuneDomain" class="autotune-input" value="discord.com" placeholder="Target Domain (e.g. discord.com)">
-        <button id="btnStartAutoTune" class="btn-primary">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-          </svg>
-          Run Benchmark
+        <button id="btnStartAutoTune" class="btn-primary" style="position: relative; overflow: hidden;">
+          <div id="autoTuneProgress" class="btn-progress-bar"></div>
+          <span class="btn-content" style="position: relative; z-index: 2; display: inline-flex; align-items: center; gap: 6px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
+            <span id="autoTuneBtnText">Run Benchmark</span>
+          </span>
         </button>
       </div>
 
@@ -964,7 +1077,7 @@ input:checked + .slider:before {
         <h4 id="winnerTitle">🏆 Optimal Strategy Identified!</h4>
         <p id="winnerDesc">-</p>
         <button id="btnApplyWinner" class="btn-primary" style="background: var(--good); width: 100%; justify-content: center;">
-          Save &amp; Apply This Strategy
+          <span class="btn-content">Save &amp; Apply This Strategy</span>
         </button>
       </div>
     </div>
@@ -1038,7 +1151,7 @@ input:checked + .slider:before {
       </div>
 
       <button id="btnSaveDns" class="btn-primary" style="width: 100%; justify-content: center; padding: 13px; margin-top: 4px;">
-        Save &amp; Apply DoH
+        <span class="btn-content">Save &amp; Apply DoH</span>
       </button>
     </div>
 
@@ -1050,7 +1163,7 @@ input:checked + .slider:before {
         <div style="display: flex; gap: 8px;">
           <input type="text" id="dnsTestDomain" class="form-input" value="discord.com" placeholder="e.g. discord.com" style="flex: 1;">
           <button type="button" id="btnRunDnsTest" class="btn-sm" style="background: var(--accent); color: #fff; padding: 0 16px; font-weight: 700;">
-            🚀 Test
+            <span class="btn-content">🚀 Test</span>
           </button>
         </div>
       </div>
@@ -1167,7 +1280,7 @@ input:checked + .slider:before {
       </div>
 
       <button id="btnSaveManual" class="btn-primary" style="width: 100%; justify-content: center; padding: 13px;">
-        Save &amp; Apply Manual Settings
+        <span class="btn-content">Save &amp; Apply Manual Settings</span>
       </button>
     </div>
   </div>
@@ -1180,12 +1293,14 @@ input:checked + .slider:before {
     <span id="selectedSummary"><b>0</b> apps selected</span>
   </div>
   <button id="btnSave" class="btn-save">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-      <polyline points="17 21 17 13 7 13 7 21"></polyline>
-      <polyline points="7 3 7 8 15 8"></polyline>
-    </svg>
-    Save &amp; Apply
+    <span class="btn-content" style="display: inline-flex; align-items: center; gap: 8px;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+        <polyline points="17 21 17 13 7 13 7 21"></polyline>
+        <polyline points="7 3 7 8 15 8"></polyline>
+      </svg>
+      Save &amp; Apply
+    </span>
   </button>
 </div>
 
@@ -1269,6 +1384,32 @@ input:checked + .slider:before {
       el.classList.remove("show");
     }, duration || 2200);
   }
+
+  function haptic(pattern) {
+    try {
+      if (navigator.vibrate) {
+        navigator.vibrate(pattern || 12);
+      }
+    } catch(e) {}
+  }
+
+  function setBtnLoading(btn, isLoading) {
+    if (!btn) return;
+    if (isLoading) {
+      btn.classList.add("btn-loading");
+      btn.disabled = true;
+    } else {
+      btn.classList.remove("btn-loading");
+      btn.disabled = false;
+    }
+  }
+
+  document.addEventListener("pointerdown", function(e) {
+    var t = e.target.closest("button, .btn-primary, .btn-secondary, .btn-save, .btn-sm, .chip, .tab, .nav-btn, .preset-card, .btn-icon, .app-item, .switch");
+    if (t) {
+      haptic(10);
+    }
+  }, { passive: true });
 
   function formatBytes(bytes) {
     if (!bytes || bytes === 0) return "0 KB";
@@ -2038,15 +2179,17 @@ input:checked + .slider:before {
     // Save Apps Button
     document.getElementById("btnSave").addEventListener("click", function() {
       var btn = document.getElementById("btnSave");
-      btn.disabled = true;
+      setBtnLoading(btn, true);
       var arr = [];
       state.selected.forEach(function(p) { arr.push(p); });
       var cmd = SCRIPT + " save-apps " + arr.join(" ");
       toast("Applying application settings...");
       ksuExec(cmd).then(function() {
-        btn.disabled = false;
+        setBtnLoading(btn, false);
         toast("Application list updated! 🟢");
         loadData();
+      }).catch(function() {
+        setBtnLoading(btn, false);
       });
     });
 
@@ -2116,6 +2259,9 @@ input:checked + .slider:before {
 
       closeCustomProfileEditor();
 
+      var btn = document.getElementById("btnSaveCustomProf");
+      setBtnLoading(btn, true);
+
       // Save custom profiles list & apply this profile immediately
       var jsonStr = JSON.stringify(state.customProfiles);
       ksuExec(SCRIPT + " save-custom-profiles " + JSON.stringify(jsonStr)).then(function() {
@@ -2126,9 +2272,14 @@ input:checked + .slider:before {
           cleanedArgs
         ].join(" ");
         ksuExec(applyCmd).then(function() {
+          setBtnLoading(btn, false);
           toast('Profile "' + name + '" saved & applied! 🟢');
           loadData();
+        }).catch(function() {
+          setBtnLoading(btn, false);
         });
+      }).catch(function() {
+        setBtnLoading(btn, false);
       });
     });
 
@@ -2162,72 +2313,166 @@ input:checked + .slider:before {
       }
     });
 
-    // Auto-Tune Start Button
+    // Auto-Tune Start Button with Live Progressive Updates & Progress Bar
     var winnerPresetName = "";
     document.getElementById("btnStartAutoTune").addEventListener("click", function() {
       var domain = document.getElementById("autoTuneDomain").value.trim() || "discord.com";
       var btn = document.getElementById("btnStartAutoTune");
-      btn.disabled = true;
-      btn.style.opacity = "0.6";
+      var pBar = document.getElementById("autoTuneProgress");
+      var btnText = document.getElementById("autoTuneBtnText");
 
+      btn.disabled = true;
+      if (pBar) pBar.style.width = "5%";
+      if (btnText) btnText.textContent = "Resolving IP...";
+      document.getElementById("winnerBanner").style.display = "none";
+
+      // Reset all row statuses to Pending
       document.querySelectorAll("#autoTuneList .strategy-row").forEach(function(row) {
         var stat = row.querySelector(".strategy-status");
-        stat.className = "strategy-status testing";
-        stat.textContent = "Testing...";
+        if (stat) {
+          stat.className = "strategy-status waiting";
+          stat.textContent = "Pending";
+        }
       });
-      document.getElementById("winnerBanner").style.display = "none";
-      toast("Benchmarking DPI strategies...");
 
-      ksuExec(SCRIPT + " autotune " + domain).then(function(res) {
-        btn.disabled = false;
-        btn.style.opacity = "1";
-        var out = res.stdout || "";
-        var lines = out.split("\n");
+      var strategies = [
+        "discord_optimal",
+        "split_sni_compatible",
+        "fake_badsum_autottl",
+        "multisplit_midsni",
+        "disorder_sni"
+      ];
 
-        lines.forEach(function(l) {
-          l = l.trim();
-          if (l.startsWith("RESULT|")) {
-            var parts = l.split("|");
-            var sName = parts[1];
-            var sStatus = parts[2];
-            var sCode = parts[3];
-            var sTime = parts[4];
-            var row = document.querySelector('.strategy-row[data-strat="' + sName + '"]');
-            if (row) {
-              var stat = row.querySelector(".strategy-status");
-              if (sStatus === "SUCCESS") {
-                stat.className = "strategy-status success";
-                stat.textContent = "🟢 " + sCode + " (" + sTime + ")";
+      var bestTime = 9999;
+      winnerPresetName = "";
+
+      toast("Initializing benchmark for " + domain + "...");
+
+      ksuExec(SCRIPT + " autotune-init " + JSON.stringify(domain)).then(function(initRes) {
+        var initOut = (initRes.stdout || "").trim();
+        if (initOut.indexOf("OK|") !== 0) {
+          toast(initOut || "DNS resolution failed", 3500);
+          btn.disabled = false;
+          if (pBar) pBar.style.width = "0%";
+          if (btnText) btnText.textContent = "Run Benchmark";
+          return;
+        }
+
+        // Sequential runner that progressively updates rows and the progress bar
+        function runStrategyIndex(idx) {
+          if (idx >= strategies.length) {
+            // All strategies finished
+            if (pBar) pBar.style.width = "100%";
+            if (btnText) btnText.textContent = "Finalizing...";
+            ksuExec(SCRIPT + " autotune-finish").then(function() {
+              setTimeout(function() {
+                if (pBar) pBar.style.width = "0%";
+                if (btnText) btnText.textContent = "Run Benchmark";
+                btn.disabled = false;
+              }, 450);
+
+              if (winnerPresetName) {
+                var banner = document.getElementById("winnerBanner");
+                banner.style.display = "block";
+                document.getElementById("winnerTitle").textContent = "🏆 Optimal Strategy: " + cleanPresetLabel(winnerPresetName);
+                document.getElementById("winnerDesc").textContent = domain + " connection verified in " + Math.round(bestTime * 1000) + "ms. This strategy successfully bypasses ISP filtering.";
+                toast("Benchmark complete! Optimal: " + cleanPresetLabel(winnerPresetName) + " 🏆");
+                haptic([30, 60, 30]);
               } else {
-                stat.className = "strategy-status failed";
-                stat.textContent = "🔴 Failed";
+                toast("No strategy succeeded! Check target domain or network.", 3500);
               }
-            }
-          } else if (l.startsWith("WINNER|")) {
-            var wParts = l.split("|");
-            var wName = wParts[1];
-            var wTime = wParts[2];
-            if (wName && wName !== "NONE") {
-              winnerPresetName = wName;
-              var banner = document.getElementById("winnerBanner");
-              banner.style.display = "block";
-              document.getElementById("winnerTitle").textContent = "🏆 Optimal Strategy: " + cleanPresetLabel(wName);
-              document.getElementById("winnerDesc").textContent = domain + " connection verified in " + wTime + ". This strategy successfully bypasses ISP filtering.";
-            } else {
-              toast("No strategy succeeded! Check target domain or network.", 3500);
+            }).catch(function() {
+              if (pBar) pBar.style.width = "0%";
+              if (btnText) btnText.textContent = "Run Benchmark";
+              btn.disabled = false;
+            });
+            return;
+          }
+
+          var stratName = strategies[idx];
+          var pct = Math.round(((idx * 2 + 1) / (strategies.length * 2)) * 100);
+          if (pBar) pBar.style.width = pct + "%";
+          if (btnText) btnText.textContent = "Testing " + (idx + 1) + "/" + strategies.length + "...";
+
+          var row = document.querySelector('.strategy-row[data-strat="' + stratName + '"]');
+          if (row) {
+            var stat = row.querySelector(".strategy-status");
+            if (stat) {
+              stat.className = "strategy-status testing";
+              stat.textContent = "Testing...";
             }
           }
-        });
+
+          ksuExec(SCRIPT + " autotune-probe " + stratName + " " + JSON.stringify(domain)).then(function(res) {
+            var out = (res.stdout || "").trim();
+            var lines = out.split("\n");
+            lines.forEach(function(l) {
+              l = l.trim();
+              if (l.startsWith("RESULT|")) {
+                var parts = l.split("|");
+                var sStatus = parts[2];
+                var sCode = parts[3];
+                var sTime = parts[4];
+                var sSec = parseFloat(parts[5] || "9999");
+                if (row) {
+                  var stat = row.querySelector(".strategy-status");
+                  if (stat) {
+                    if (sStatus === "SUCCESS") {
+                      stat.className = "strategy-status success";
+                      stat.textContent = "🟢 " + sCode + " (" + sTime + ")";
+                      if (sSec < bestTime) {
+                        bestTime = sSec;
+                        winnerPresetName = stratName;
+                      }
+                    } else {
+                      stat.className = "strategy-status failed";
+                      stat.textContent = "🔴 Failed";
+                    }
+                  }
+                }
+              }
+            });
+
+            var stepDonePct = Math.round(((idx + 1) / strategies.length) * 100);
+            if (pBar) pBar.style.width = stepDonePct + "%";
+            haptic(10);
+
+            // Move to next strategy immediately
+            runStrategyIndex(idx + 1);
+          }).catch(function() {
+            if (row) {
+              var stat = row.querySelector(".strategy-status");
+              if (stat) {
+                stat.className = "strategy-status failed";
+                stat.textContent = "🔴 Error";
+              }
+            }
+            runStrategyIndex(idx + 1);
+          });
+        }
+
+        // Start sequential probes
+        runStrategyIndex(0);
+      }).catch(function() {
+        btn.disabled = false;
+        if (pBar) pBar.style.width = "0%";
+        if (btnText) btnText.textContent = "Run Benchmark";
+        toast("Failed to initialize benchmark", 3000);
       });
     });
 
     // Apply Winner Button
     document.getElementById("btnApplyWinner").addEventListener("click", function() {
       if (!winnerPresetName) return;
+      var btn = document.getElementById("btnApplyWinner");
+      setBtnLoading(btn, true);
       toast("Applying winning strategy...");
       ksuExec(SCRIPT + " set-preset " + winnerPresetName).then(function() {
+        setBtnLoading(btn, false);
         toast("Strategy saved and applied! 🟢");
         loadData();
+      }).catch(function() {
+        setBtnLoading(btn, false);
       });
     });
 
@@ -2248,6 +2493,8 @@ input:checked + .slider:before {
 
     // Save Manual Button
     document.getElementById("btnSaveManual").addEventListener("click", function() {
+      var btn = document.getElementById("btnSaveManual");
+      setBtnLoading(btn, true);
       var isManual = document.getElementById("manualModeToggle").checked;
       var mode = isManual ? "manual" : "preset";
       var preset = state.config.PRESET_NAME || "discord_optimal";
@@ -2292,8 +2539,11 @@ input:checked + .slider:before {
 
       toast("Saving manual configuration...");
       ksuExec(cmd).then(function() {
+        setBtnLoading(btn, false);
         toast("Manual settings applied successfully! 🟢");
         loadData();
+      }).catch(function() {
+        setBtnLoading(btn, false);
       });
     });
 
@@ -2345,6 +2595,7 @@ input:checked + .slider:before {
         var opt = dSelect ? dSelect.options[dSelect.selectedIndex] : null;
         var preset = opt ? (opt.getAttribute("data-preset") || "custom") : "custom";
 
+        setBtnLoading(btnSaveDns, true);
         toast("Applying DNS configuration...");
         var cmd = [
           SCRIPT,
@@ -2355,8 +2606,11 @@ input:checked + .slider:before {
         ].join(" ");
 
         ksuExec(cmd).then(function() {
+          setBtnLoading(btnSaveDns, false);
           toast("DNS settings applied successfully! 🟢");
           loadData();
+        }).catch(function() {
+          setBtnLoading(btnSaveDns, false);
         });
       });
     }
@@ -2395,8 +2649,10 @@ input:checked + .slider:before {
         var lat = document.getElementById("dnsTestLatency");
         var ips = document.getElementById("dnsTestIps");
 
+        setBtnLoading(btnRunDns, true);
         toast("Resolving " + dom + " via DoH...");
         ksuExec(SCRIPT + " test-dns " + JSON.stringify(dom)).then(function(res) {
+          setBtnLoading(btnRunDns, false);
           var out = (res.stdout || "").trim();
           resBox.style.display = "block";
           var parts = out.split("|");
@@ -2413,6 +2669,8 @@ input:checked + .slider:before {
             lat.textContent = parts[3] || "";
             ips.textContent = parts[2] || "Resolution failed";
           }
+        }).catch(function() {
+          setBtnLoading(btnRunDns, false);
         });
       });
     }

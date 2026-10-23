@@ -7,7 +7,7 @@ esac
 
 echo ""
 echo "=========================================="
-echo "          App DPI Bypass Kontrol"
+echo "          App DPI Bypass Control"
 echo "=========================================="
 echo ""
 

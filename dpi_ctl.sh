@@ -205,11 +205,14 @@ update_desc() {
     if [ -f "$PROP" ]; then
         sed -i "s|^description=.*|description=$NEW_DESC|" "$PROP" 2>/dev/null
     fi
+    if [ -f "/data/adb/modules/app-dpi-bypass/module.prop" ]; then
+        sed -i "s|^description=.*|description=$NEW_DESC|" "/data/adb/modules/app-dpi-bypass/module.prop" 2>/dev/null
+    fi
 }
 
 apply_iptables_rules() {
     UIDS="$1"
-    echo "[*] iptables & ip6tables kuralları uygulanıyor (UID listesi: $UIDS)..."
+    echo "[*] Applying iptables & ip6tables rules (UIDs: $UIDS)..."
 
     for ipt in iptables ip6tables; do
         while $ipt -t mangle -D OUTPUT -j $LEGACY_CHAIN 2>/dev/null; do :; done
@@ -233,7 +236,7 @@ apply_iptables_rules() {
 }
 
 clean_iptables_rules() {
-    echo "[*] iptables & ip6tables kuralları temizleniyor..."
+    echo "[*] Clearing iptables & ip6tables rules..."
     for ipt in iptables ip6tables; do
         for ch in $CHAIN $LEGACY_CHAIN; do
             while $ipt -t mangle -D OUTPUT -j $ch 2>/dev/null; do :; done
@@ -245,10 +248,10 @@ clean_iptables_rules() {
 
 start_nfqws() {
     if ! pidof nfqws >/dev/null 2>&1; then
-        echo "[*] nfqws daemon başlatılıyor..."
+        echo "[*] Starting nfqws daemon..."
         killall -9 nfqws 2>/dev/null
         NFQ_ARGS=$(build_nfqws_args)
-        echo "[*] nfqws parametreleri: $NFQ_ARGS"
+        echo "[*] nfqws parameters: $NFQ_ARGS"
         eval "$BIN --daemon --uid=0:0,3003 --qnum=$QNUM $NFQ_ARGS"
         sleep 0.5
     fi
@@ -258,7 +261,7 @@ start_doh() {
     load_config
     if [ "$DNS_ENABLED" = "1" ] && [ -x "$DOH_BIN" ]; then
         if ! pidof doh_forwarder >/dev/null 2>&1; then
-            echo "[*] DoH forwarder daemon başlatılıyor (upstream: $DNS_UPSTREAM)..."
+            echo "[*] Starting DoH forwarder daemon (upstream: $DNS_UPSTREAM)..."
             killall -9 doh_forwarder 2>/dev/null
             "$DOH_BIN" -listen 127.0.0.1:5354 -upstream "$DNS_UPSTREAM" -config "$CONFIG_FILE" >/dev/null 2>&1 &
             sleep 0.2
@@ -273,8 +276,8 @@ stop_doh() {
 start() {
     UIDS=$(get_target_uids)
     if [ -z "$UIDS" ]; then
-        echo "[-] Uyarı: apps.list içinde hedef paket veya aktif UID bulunamadı!"
-        update_desc "[Pasif 🔴] apps.list boş veya seçili uygulamalar yüklü değil. WebUI üzerinden uygulama seçin."
+        echo "[-] Warning: Target packages or active UIDs not found in apps.list!"
+        update_desc "[Inactive 🔴] apps.list is empty or target apps are not installed. Select apps in WebUI."
         return 1
     fi
 
@@ -285,34 +288,34 @@ start() {
 
     if pidof nfqws >/dev/null 2>&1; then
         load_config
-        echo "[+] App DPI Bypass başlatıldı (PID: $(pidof nfqws), $APP_COUNT uygulama, Mod: $DPI_MODE)."
-        update_desc "[Aktif 🟢] $APP_COUNT uygulama için DPI bypass aktif (Mod: $PRESET_NAME, UID: $UIDS)."
+        echo "[+] App DPI Bypass started (PID: $(pidof nfqws), $APP_COUNT apps, Mode: $DPI_MODE)."
+        update_desc "[Active 🟢] DPI bypass active for $APP_COUNT apps (Mode: $PRESET_NAME, UID: $UIDS)."
         return 0
     else
-        echo "[-] Hata: nfqws başlatılamadı!"
+        echo "[-] Error: nfqws failed to start!"
         stop
         return 1
     fi
 }
 
 stop() {
-    echo "[*] nfqws durduruluyor..."
+    echo "[*] Stopping nfqws..."
     killall -9 nfqws 2>/dev/null
     stop_doh
     clean_iptables_rules
-    update_desc "[Pasif 🔴] DPI bypass durduruldu. WebUI veya Action butonu ile başlatabilirsiniz."
-    echo "[+] App DPI Bypass durduruldu."
+    update_desc "[Inactive 🔴] DPI bypass stopped. Start via WebUI or Action button."
+    echo "[+] App DPI Bypass stopped."
 }
 
 reload() {
     UIDS=$(get_target_uids)
     APP_COUNT=$(grep -cvE '^[[:space:]]*(#|$)' "$CONF" 2>/dev/null)
     if [ -z "$UIDS" ]; then
-        echo "[-] Hedef UID kalmadı, kurallar temizleniyor..."
+        echo "[-] No target UIDs remaining, clearing rules..."
         clean_iptables_rules
         killall -9 nfqws 2>/dev/null
         stop_doh
-        update_desc "[Pasif 🔴] Hiçbir uygulama seçili değil. WebUI üzerinden uygulama seçin."
+        update_desc "[Inactive 🔴] No target apps selected. Select applications in WebUI."
         return 0
     fi
 
@@ -322,8 +325,8 @@ reload() {
     stop_doh
     start_doh
     load_config
-    update_desc "[Aktif 🟢] $APP_COUNT uygulama için DPI bypass aktif (Mod: $PRESET_NAME, UID: $UIDS)."
-    echo "[+] Yapılandırma yenilendi ($APP_COUNT uygulama, UID: $UIDS)."
+    update_desc "[Active 🟢] DPI bypass active for $APP_COUNT apps (Mode: $PRESET_NAME, UID: $UIDS)."
+    echo "[+] Configuration reloaded ($APP_COUNT apps, UID: $UIDS)."
 }
 
 status() {
@@ -334,29 +337,29 @@ status() {
         PKTS=$(iptables -t mangle -L $CHAIN -n -v -x 2>/dev/null | awk '$3=="NFQUEUE"{s+=$1} END{print s+0}')
         BYTES=$(iptables -t mangle -L $CHAIN -n -v -x 2>/dev/null | awk '$3=="NFQUEUE"{s+=$2} END{print s+0}')
         if [ "$DPI_MODE" = "preset" ]; then
-            MODE_STR="Hazır Profil ($PRESET_NAME)"
+            MODE_STR="Preset ($PRESET_NAME)"
         elif [ "$DPI_MODE" = "custom" ]; then
-            MODE_STR="Yerel Profil ($CUSTOM_PROFILE_NAME)"
+            MODE_STR="Custom Profile ($CUSTOM_PROFILE_NAME)"
         else
-            MODE_STR="Manuel Mod ($TCP_DESYNC, fooling: $TCP_FOOLING)"
+            MODE_STR="Manual ($TCP_DESYNC, fooling: $TCP_FOOLING)"
         fi
-        echo "Durum: Aktif 🟢 (PID: $(pidof nfqws))"
-        echo "Çalışma Modu: $MODE_STR"
-        echo "Hedef Uygulamalar: $APP_COUNT adet (UID: $UIDS)"
-        echo "İşlenen Trafik: $PKTS paket ($(awk -v b="$BYTES" 'BEGIN{if(b>1048576) printf "%.2f MB", b/1048576; else printf "%.2f KB", b/1024}') )"
+        echo "Status: Active 🟢 (PID: $(pidof nfqws))"
+        echo "Mode: $MODE_STR"
+        echo "Target Apps: $APP_COUNT packages (UID: $UIDS)"
+        echo "Processed Traffic: $PKTS packets ($(awk -v b="$BYTES" 'BEGIN{if(b>1048576) printf "%.2f MB", b/1048576; else printf "%.2f KB", b/1024}') )"
         if [ "$DNS_ENABLED" = "1" ]; then
             DOH_PID=$(pidof doh_forwarder 2>/dev/null)
             if [ -n "$DOH_PID" ]; then
-                echo "Zygisk DoH DNS: Aktif 🟢 (PID: $DOH_PID, Upstream: $DNS_UPSTREAM)"
+                echo "Zygisk DoH DNS: Active 🟢 (PID: $DOH_PID, Upstream: $DNS_UPSTREAM)"
             else
-                echo "Zygisk DoH DNS: Beklemede 🟡 (Upstream: $DNS_UPSTREAM)"
+                echo "Zygisk DoH DNS: Standby 🟡 (Upstream: $DNS_UPSTREAM)"
             fi
         else
-            echo "Zygisk DoH DNS: Devre Dışı ⚪"
+            echo "Zygisk DoH DNS: Disabled ⚪"
         fi
     else
-        echo "Durum: Pasif 🔴"
-        echo "Kurallar devre dışı veya nfqws çalışmıyor."
+        echo "Status: Inactive 🔴"
+        echo "Rules disabled or nfqws is not running."
     fi
 }
 
@@ -460,9 +463,9 @@ DNS_UPSTREAM="${19:-https://1.1.1.1/dns-query}"
 EOF
     mv -f "$TMP" "$CONFIG_FILE"
     cp -f "$CONFIG_FILE" "$MODDIR/config.conf" 2>/dev/null || true
-    echo "[+] Yapılandırma kaydedildi ($CONFIG_FILE)."
+    echo "[+] Configuration saved ($CONFIG_FILE)."
     if is_running; then
-        echo "[*] Servisler yeni ayarlarla yeniden başlatılıyor..."
+        echo "[*] Restarting services with updated configuration..."
         killall -9 nfqws 2>/dev/null
         start_nfqws
         stop_doh
@@ -492,7 +495,7 @@ set_dns() {
     PRESET="${3:-custom}"
     load_config
     save_config "$DPI_MODE" "$PRESET_NAME" "$TCP_DESYNC" "$TCP_SPLIT_POS" "$TCP_FOOLING" "$TCP_TTL_MODE" "$TCP_TTL_VALUE" "$TCP_PORTS" "$UDP_DESYNC" "$UDP_REPEATS" "$UDP_PORTS" "$UDP_FILTER_L7" "$CUSTOM_EXTRA_ARGS" "$AUTO_TARGET_DOMAIN" "$CUSTOM_PROFILE_NAME" "$CUSTOM_PROFILE_ARGS" "$ENABLED" "$PRESET" "$UPSTREAM"
-    echo "[+] DNS ayarları güncellendi: ENABLED=$ENABLED, PRESET=$PRESET, UPSTREAM=$UPSTREAM"
+    echo "[+] DNS settings updated: ENABLED=$ENABLED, PRESET=$PRESET, UPSTREAM=$UPSTREAM"
 }
 
 test_dns() {
@@ -511,14 +514,11 @@ save_custom_profiles() {
     TMP="$DATA_DIR/custom_profiles.json.tmp"
     printf "%s\n" "$JSON_DATA" > "$TMP"
     mv -f "$TMP" "$DATA_DIR/custom_profiles.json"
-    echo "[+] Yerel profiller listesi güncellendi."
+    echo "[+] Custom profiles updated."
 }
 
-autotune() {
+autotune_init() {
     TARGET_DOM="${1:-discord.com}"
-    echo "=== AUTOTUNE START ==="
-    echo "Target: $TARGET_DOM"
-
     TARGET_IP=""
     if [ -x "/system/bin/toybox" ]; then
         TARGET_IP=$(toybox ping -c 1 -W 2 "$TARGET_DOM" 2>/dev/null | grep -m1 -oE '\([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\)' | tr -d '()')
@@ -528,69 +528,120 @@ autotune() {
     fi
 
     if [ -z "$TARGET_IP" ]; then
-        echo "ERROR: DNS çözümleme başarısız ($TARGET_DOM IP adresi bulunamadı)!"
-        echo "=== AUTOTUNE END ==="
+        echo "ERROR|DNS resolution failed for $TARGET_DOM"
         return 1
     fi
-    echo "Resolved IP: $TARGET_IP"
 
     WAS_RUNNING=0
     pidof nfqws >/dev/null 2>&1 && WAS_RUNNING=1
     killall -9 nfqws 2>/dev/null
 
-    STRATEGIES="discord_optimal|--filter-tcp=80,443 --dpi-desync=fake --dpi-desync-fooling=md5sig
-split_sni_compatible|--filter-tcp=80,443 --dpi-desync=split --dpi-desync-split-pos=sni
-fake_badsum_autottl|--filter-tcp=80,443 --dpi-desync=fake --dpi-desync-fooling=badsum --dpi-desync-autottl=-1
-multisplit_midsni|--filter-tcp=80,443 --dpi-desync=multisplit --dpi-desync-split-pos=2,midsni
-disorder_sni|--filter-tcp=80,443 --dpi-desync=disorder --dpi-desync-split-pos=sni"
+    mkdir -p "$DATA_DIR"
+    echo "$TARGET_IP|$WAS_RUNNING" > "$DATA_DIR/.autotune_state"
+
+    iptables -t mangle -I OUTPUT 1 -d "$TARGET_IP" -p tcp --dport 443 -j NFQUEUE --queue-num "$QNUM" --queue-bypass 2>/dev/null
+    echo "OK|$TARGET_IP"
+}
+
+autotune_probe() {
+    NAME="$1"
+    TARGET_DOM="${2:-discord.com}"
+    [ -z "$NAME" ] && return 1
+
+    case "$NAME" in
+        discord_optimal)
+            PARAM="--filter-tcp=80,443 --dpi-desync=fake --dpi-desync-fooling=md5sig"
+            ;;
+        split_sni_compatible)
+            PARAM="--filter-tcp=80,443 --dpi-desync=split --dpi-desync-split-pos=sni"
+            ;;
+        fake_badsum_autottl)
+            PARAM="--filter-tcp=80,443 --dpi-desync=fake --dpi-desync-fooling=badsum --dpi-desync-autottl=-1"
+            ;;
+        multisplit_midsni)
+            PARAM="--filter-tcp=80,443 --dpi-desync=multisplit --dpi-desync-split-pos=2,midsni"
+            ;;
+        disorder_sni)
+            PARAM="--filter-tcp=80,443 --dpi-desync=disorder --dpi-desync-split-pos=sni"
+            ;;
+        *)
+            PARAM="--filter-tcp=80,443 --dpi-desync=fake --dpi-desync-fooling=md5sig"
+            ;;
+    esac
+
+    killall -9 nfqws 2>/dev/null
+    eval "$BIN --daemon --uid=0:0,3003 --qnum=$QNUM $PARAM" 2>/dev/null
+    sleep 0.25
+
+    PROBE=$(curl -s -k -o /dev/null -w "%{http_code} %{time_total}" --connect-timeout 2 -m 3 "https://$TARGET_DOM" 2>/dev/null || echo "000 0")
+    HTTP_CODE=$(echo "$PROBE" | awk '{print $1}')
+    TIME_SEC=$(echo "$PROBE" | awk '{print $2}')
+
+    killall -9 nfqws 2>/dev/null
+
+    if [ "$HTTP_CODE" != "000" ] && [ -n "$HTTP_CODE" ]; then
+        MS=$(awk -v t="$TIME_SEC" 'BEGIN{printf "%.0f", t*1000}')
+        echo "RESULT|$NAME|SUCCESS|$HTTP_CODE|${MS}ms|$TIME_SEC"
+    else
+        echo "RESULT|$NAME|FAILED|TIMEOUT|0ms|9999"
+    fi
+}
+
+autotune_finish() {
+    STATE_FILE="$DATA_DIR/.autotune_state"
+    if [ -f "$STATE_FILE" ]; then
+        TARGET_IP=$(cut -d'|' -f1 "$STATE_FILE" 2>/dev/null)
+        WAS_RUNNING=$(cut -d'|' -f2 "$STATE_FILE" 2>/dev/null)
+        if [ -n "$TARGET_IP" ]; then
+            iptables -t mangle -D OUTPUT -d "$TARGET_IP" -p tcp --dport 443 -j NFQUEUE --queue-num "$QNUM" --queue-bypass 2>/dev/null
+        fi
+        rm -f "$STATE_FILE"
+        if [ "$WAS_RUNNING" = "1" ]; then
+            start_nfqws
+        fi
+    fi
+    echo "FINISHED"
+}
+
+autotune() {
+    TARGET_DOM="${1:-discord.com}"
+    echo "=== AUTOTUNE START ==="
+    echo "Target: $TARGET_DOM"
+
+    INIT_OUT=$(autotune_init "$TARGET_DOM")
+    STATUS=$(echo "$INIT_OUT" | cut -d'|' -f1)
+    if [ "$STATUS" != "OK" ]; then
+        echo "$INIT_OUT"
+        echo "=== AUTOTUNE END ==="
+        return 1
+    fi
+    TARGET_IP=$(echo "$INIT_OUT" | cut -d'|' -f2)
+    echo "Resolved IP: $TARGET_IP"
 
     WINNER=""
     BEST_TIME="9999"
 
-    iptables -t mangle -I OUTPUT 1 -d "$TARGET_IP" -p tcp --dport 443 -j NFQUEUE --queue-num "$QNUM" --queue-bypass 2>/dev/null
-
-    OLD_IFS="$IFS"
-    IFS='
-'
-    for line in $STRATEGIES; do
-        [ -z "$line" ] && continue
-        NAME=$(echo "$line" | cut -d'|' -f1)
-        PARAM=$(echo "$line" | cut -d'|' -f2)
-
-        killall -9 nfqws 2>/dev/null
-        eval "$BIN --daemon --uid=0:0,3003 --qnum=$QNUM $PARAM" 2>/dev/null
-        sleep 0.25
-
-        PROBE=$(curl -s -k -o /dev/null -w "%{http_code} %{time_total}" --connect-timeout 2 -m 3 "https://$TARGET_DOM" 2>/dev/null || echo "000 0")
-        HTTP_CODE=$(echo "$PROBE" | awk '{print $1}')
-        TIME_SEC=$(echo "$PROBE" | awk '{print $2}')
-
-        if [ "$HTTP_CODE" != "000" ] && [ -n "$HTTP_CODE" ]; then
-            MS=$(awk -v t="$TIME_SEC" 'BEGIN{printf "%.0f", t*1000}')
-            echo "RESULT|$NAME|SUCCESS|$HTTP_CODE|${MS}ms"
-            IS_BETTER=$(awk -v t1="$TIME_SEC" -v t2="$BEST_TIME" 'BEGIN{print (t1 < t2) ? 1 : 0}')
+    for strat in discord_optimal split_sni_compatible fake_badsum_autottl multisplit_midsni disorder_sni; do
+        OUT=$(autotune_probe "$strat" "$TARGET_DOM")
+        echo "$OUT" | cut -d'|' -f1-5
+        S_STAT=$(echo "$OUT" | cut -d'|' -f3)
+        T_SEC=$(echo "$OUT" | cut -d'|' -f6)
+        if [ "$S_STAT" = "SUCCESS" ]; then
+            IS_BETTER=$(awk -v t1="$T_SEC" -v t2="$BEST_TIME" 'BEGIN{print (t1 < t2) ? 1 : 0}')
             if [ "$IS_BETTER" -eq 1 ]; then
-                BEST_TIME="$TIME_SEC"
-                WINNER="$NAME"
+                BEST_TIME="$T_SEC"
+                WINNER="$strat"
             fi
-        else
-            echo "RESULT|$NAME|FAILED|TIMEOUT|0ms"
         fi
     done
-    IFS="$OLD_IFS"
 
-    iptables -t mangle -D OUTPUT -d "$TARGET_IP" -p tcp --dport 443 -j NFQUEUE --queue-num "$QNUM" --queue-bypass 2>/dev/null
-    killall -9 nfqws 2>/dev/null
+    autotune_finish >/dev/null 2>&1
 
     if [ -n "$WINNER" ]; then
         WINNER_MS=$(awk -v t="$BEST_TIME" 'BEGIN{printf "%.0f", t*1000}')
         echo "WINNER|$WINNER|${WINNER_MS}ms"
     else
         echo "WINNER|NONE|0ms"
-    fi
-
-    if [ "$WAS_RUNNING" -eq 1 ]; then
-        start_nfqws
     fi
 
     echo "=== AUTOTUNE END ==="
@@ -602,10 +653,10 @@ add_app() {
     mkdir -p "$DATA_DIR"
     if ! grep -qxF "$PKG" "$CONF" 2>/dev/null; then
         echo "$PKG" >> "$CONF"
-        echo "[+] Paket eklendi: $PKG"
+        echo "[+] Added package: $PKG"
         reload
     else
-        echo "[!] Paket zaten ekli: $PKG"
+        echo "[!] Package already added: $PKG"
     fi
 }
 
@@ -614,7 +665,7 @@ del_app() {
     [ -z "$PKG" ] && return 1
     if [ -f "$CONF" ]; then
         sed -i "/^$PKG$/d" "$CONF" 2>/dev/null
-        echo "[+] Paket çıkarıldı: $PKG"
+        echo "[+] Removed package: $PKG"
         reload
     fi
 }
@@ -640,6 +691,9 @@ case "$1" in
     set-dns)     shift; set_dns "$@" ;;
     test-dns)    shift; test_dns "$@" ;;
     autotune)    shift; autotune "$@" ;;
+    autotune-init) shift; autotune_init "$@" ;;
+    autotune-probe) shift; autotune_probe "$@" ;;
+    autotune-finish) shift; autotune_finish "$@" ;;
     preview-cli) preview_cli ;;
     add-app)     shift; add_app "$@" ;;
     del-app)     shift; del_app "$@" ;;
